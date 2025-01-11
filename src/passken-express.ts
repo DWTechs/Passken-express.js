@@ -1,5 +1,6 @@
 import { compare as comp, encrypt, create as createPwd } from "@dwtechs/passken";
 import { log } from "@dwtechs/winstan";
+import type { Request, Response, NextFunction } from 'express';
 
 const { 
   PWD_AUTO_LENGTH,
@@ -12,40 +13,44 @@ const {
   PWD_SECRET,
 } = process.env;
 
+interface MyResponse extends Response {
+  rows: any[];
+}
+
 /**
  * This function checks if a user-provided password matches a stored hashed password in a database.
  * It takes a request object req and a response object res as input, and uses a pass service to compare the password.
  * If the password is correct, it calls the next() function to proceed with the request.
  * If the password is incorrect or missing, it calls next() with an error status and message.
  */
-function compare(req, res, next) {
+function compare(req: Request, res: MyResponse, next: NextFunction) {
   const pwd = req.body.pwd; // from request
   const dbHash = res.rows[0].password; //from db
   log.debug(`Compare Passwords: pwd=${!!pwd}, dbHash=${!!dbHash}`);
-  if (comp(pwd, dbHash, PWD_SECRET)) {
+  if (comp(pwd, dbHash, PWD_SECRET as string)) {
     log.debug("Correct password");
     return next();
   }
-  return next({ status: 401, msg: "Wrong password" });
+  next({ status: 401, msg: "Wrong password" });
 }
 
 /**
  * Generates random passwords for multiple users and encrypts them.
  */
-function create(req, res, next) {
+function create(req: Request, _res: Response, next: NextFunction): void {
   log.debug("create passwords");
 
   for (const u of req.body.rows) {
     u.pwd = createPwd({
-      length: PWD_AUTO_LENGTH,
-      numbers: PWD_AUTO_NUMBERS,
-      uppercase: PWD_AUTO_UPPERCASE,
-      lowercase: PWD_AUTO_LOWERCASE,
-      symbols: PWD_AUTO_SYMBOLS,
-      strict: PWD_AUTO_STRICT,
-      excludeSimilarCharacters: PWD_AUTO_EXCLUDE_SIMILAR_CHARS,
+      len: PWD_AUTO_LENGTH as unknown as number,
+      num: PWD_AUTO_NUMBERS as unknown as boolean,
+      ucase: PWD_AUTO_UPPERCASE as unknown as boolean,
+      lcase: PWD_AUTO_LOWERCASE as unknown as boolean,
+      sym: PWD_AUTO_SYMBOLS as unknown as boolean,
+      strict: PWD_AUTO_STRICT as unknown as boolean,
+      exclSimilarChars: PWD_AUTO_EXCLUDE_SIMILAR_CHARS as unknown as boolean,
     });
-    u.encryptedPwd = encrypt(u.pwd, PWD_SECRET);
+    u.encryptedPwd = encrypt(u.pwd, PWD_SECRET as string);
   }
   next();
 }

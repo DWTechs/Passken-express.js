@@ -28,7 +28,7 @@
     "build": "node ./scripts/clear && tsc && npm run rollup && node ./scripts/copy && npm run test",
     "rollup:mjs": "rollup --config rollup.config.mjs",
     "rollup:cjs": "rollup --config rollup.config.cjs.mjs",
-    "rollup": "npm run rollup:mjs && npm run rollup:cjs",
+    "rollup": "npm run rollup:mjs",
     "test": ""
   },
   "files": [
@@ -36,7 +36,7 @@
   ],
   "dependencies": {
     "@dwtechs/passken": "0.1.0",
-    "@dwtechs/winstan": "0.1.1"
+    "@dwtechs/winstan": "0.3.0"
   },
   "devDependencies": {
     "@types/express": "5.0.0",
