@@ -1,0 +1,48 @@
+{
+  "name": "@dwtechs/passken-express",
+  "version": "0.1.0",
+  "description": "Open source Express performance measurement plugin for Winstan library.",
+  "keywords": [
+    "perf"
+  ],
+  "homepage": "https://github.com/DWTechs/passken-express.js",
+  "main": "dist/passken-express",
+  "types": "dist/passken-express",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DWTechs/Passken-express.js"
+  },
+  "bugs": {
+    "url": "https://github.com/DWTechs/Passken-express.js/issues",
+    "email": ""
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Ludovic Cluber",
+    "email": "http://www.lcluber.com/contact",
+    "url": "http://www.lcluber.com"
+  },
+  "contributors": [],
+  "scripts": {
+    "start": "",
+    "build": "node ./scripts/clear && tsc && npm run rollup && node ./scripts/copy && npm run test",
+    "rollup:mjs": "rollup --config rollup.config.mjs",
+    "rollup:cjs": "rollup --config rollup.config.cjs.mjs",
+    "rollup": "npm run rollup:mjs && npm run rollup:cjs",
+    "test": ""
+  },
+  "files": [
+    "dist/"
+  ],
+  "dependencies": {
+    "@dwtechs/passken": "0.1.0",
+    "@dwtechs/winstan": "0.1.1"
+  },
+  "devDependencies": {
+    "@types/express": "5.0.0",
+    "@rollup/plugin-node-resolve": "15.3.0",
+    "core-js": "3.38.1",
+    "rollup": "4.24.0",
+    "typescript": "5.6.3"
+  }
+}
