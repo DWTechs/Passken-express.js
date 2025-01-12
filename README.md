@@ -71,8 +71,45 @@ router.post("/", addMany);
 
 ```
 
+### Configure
+
+Passken will start with the following default password configuration : 
+
+```Javascript
+Options = {
+  len: 12,
+  num: true,
+  ucase: true,
+  lcase: true,
+  sym: false,
+  strict: true,
+  exclSimilarChars: true,
+};
+```
+
+### Environment variables
+
+You can update password configuration using the following environment variables :  
+
+```bash
+  PWD_AUTO_LENGTH,
+  PWD_AUTO_NUMBERS,
+  PWD_AUTO_UPPERCASE,
+  PWD_AUTO_LOWERCASE,
+  PWD_AUTO_SYMBOLS,
+  PWD_AUTO_STRICT,
+  PWD_AUTO_EXCLUDE_SIMILAR_CHARS,
+  PWD_SECRET,
+```
+
+These environment variables will update the default values of the lib at start up.
+So you do not need to init the library in the code.
+
+Note that **PWD_SECRET** is mandatory.
+
 
 ## API Reference
+
 
 ### Methods
 
