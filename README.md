@@ -74,6 +74,8 @@ router.post("/", addMany);
 
 ## API Reference
 
+### Methods
+
 ```javascript
 
 compare(req: Request, res: MyResponse, next: NextFunction): void {}
