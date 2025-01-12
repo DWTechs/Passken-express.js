@@ -1,25 +1,26 @@
 
-[![License: MIT](https://img.shields.io/npm/l/@dwtechs/winstan-plugin-express-perf.svg?color=brightgreen)](https://opensource.org/licenses/MIT)
-[![npm version](https://badge.fury.io/js/%40dwtechs%2Fwinstan-plugin-express-perf.svg)](https://www.npmjs.com/package/@dwtechs/winstan-plugin-express-perf)
-[![last version release date](https://img.shields.io/github/release-date/DWTechs/Winstan-plugin-express-perf.js)](https://www.npmjs.com/package/@dwtechs/winstan-plugin-express-perf)
-[![minified size](https://img.shields.io/bundlephobia/min/@dwtechs/winstan-plugin-express-perf?color=brightgreen)](https://www.npmjs.com/package/@dwtechs/winstan-plugin-express-perf)
+[![License: MIT](https://img.shields.io/npm/l/@dwtechs/passken-express.svg?color=brightgreen)](https://opensource.org/licenses/MIT)
+[![npm version](https://badge.fury.io/js/%40dwtechs%2Fpassken-express.svg)](https://www.npmjs.com/package/@dwtechs/passken-express)
+[![last version release date](https://img.shields.io/github/release-date/DWTechs/Passken-express.js)](https://www.npmjs.com/package/@dwtechs/passken-express)
+[![minified size](https://img.shields.io/bundlephobia/min/@dwtechs/passken-express?color=brightgreen)](https://www.npmjs.com/package/@dwtechs/passken-express)
 
 - [Synopsis](#synopsis)
 - [Support](#support)
 - [Installation](#installation)
 - [Usage](#usage)
   - [ES6](#es6)
+- [API Reference](#api-reference)
 - [Contributors](#contributors)
 - [Stack](#stack)
 
 
 ## Synopsis
 
-**[Winstan-plugin-express-perf.js](https://github.com/DWTechs/Winstan-plugin-express-perf.js)** is an open source Express performance measurement plugin for Winstan library.
+**[Passken-express.js](https://github.com/DWTechs/Passken-express.js)** is an open source password management library for Express.js.  
+It uses @dwtechs/passken and brings Express middlewares for direct use in a node.js service.
 
 **This plugin will log the time it took to process a request.**
 
-- no dependency
 - Very lightweight
 - Thoroughly tested
 - Works in Javascript and Typescript
@@ -29,7 +30,7 @@
 
 ## Support
 
-- node: 22
+- node: 26
 
 This is the oldest targeted versions. The library should work properly on older versions of Node.js but we do not support it officially.  
 
@@ -49,20 +50,36 @@ $ npm i @dwtechs/winstan-plugin-express-perf
 ```javascript
 
 import express from "express";
-import perf from '@dwtechs/winstan-plugin-express-perf';
+import pwd from "@dwtechs/passken-express";
+import pg from "@internal/pgsql";
 
-const app = express();
-app.use(express.json());
-// performance measurement starts for any call to the following routes
-app.use(perf.start);
-app.use("/", route);
-// Performance measurement ends
-app.use(perf.end);
+import user from "../controllers/user.js";
+import mail from "../controllers/mail.js";
+
+const addMany = [
+  user.validate,
+  pwd.create,
+  user.addMany,
+  pg.beginTransaction,
+  pg.addMany,
+  mail.sendRegistration,
+  pg.commitTransaction,
+];
+
+// Add new users
+router.post("/", addMany);
 
 ```
 
-Note that the plugin is standalone as it installs Winstan as a dependency.
-Of course you will usually need Winstan to log other things in you application. 
+
+## API Reference
+
+```javascript
+
+compare(req: Request, res: MyResponse, next: NextFunction): void {}
+create(req: Request, res: Response, next: NextFunction): void {}
+
+```
 
 
 ## Contributors
