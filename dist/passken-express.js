@@ -28,6 +28,18 @@ import { compare as compare$1, create as create$1, encrypt } from '@dwtechs/pass
 import { log } from '@dwtechs/winstan';
 
 const { PWD_AUTO_LENGTH, PWD_AUTO_NUMBERS, PWD_AUTO_UPPERCASE, PWD_AUTO_LOWERCASE, PWD_AUTO_SYMBOLS, PWD_AUTO_STRICT, PWD_AUTO_EXCLUDE_SIMILAR_CHARS, PWD_SECRET, } = process.env;
+const conf = {
+    len: PWD_AUTO_LENGTH,
+    num: PWD_AUTO_NUMBERS,
+    ucase: PWD_AUTO_UPPERCASE,
+    lcase: PWD_AUTO_LOWERCASE,
+    sym: PWD_AUTO_SYMBOLS,
+    strict: PWD_AUTO_STRICT,
+    exclSimilarChars: PWD_AUTO_EXCLUDE_SIMILAR_CHARS,
+};
+if (!PWD_SECRET) {
+    throw new Error("Missing PWD_SECRET environment variable");
+}
 function compare(req, res, next) {
     const pwd = req.body.pwd;
     const dbHash = res.rows[0].password;
@@ -41,15 +53,7 @@ function compare(req, res, next) {
 function create(req, _res, next) {
     log.debug("create passwords");
     for (const u of req.body.rows) {
-        u.pwd = create$1({
-            len: PWD_AUTO_LENGTH,
-            num: PWD_AUTO_NUMBERS,
-            ucase: PWD_AUTO_UPPERCASE,
-            lcase: PWD_AUTO_LOWERCASE,
-            sym: PWD_AUTO_SYMBOLS,
-            strict: PWD_AUTO_STRICT,
-            exclSimilarChars: PWD_AUTO_EXCLUDE_SIMILAR_CHARS,
-        });
+        u.pwd = create$1(conf);
         u.encryptedPwd = encrypt(u.pwd, PWD_SECRET);
     }
     next();
