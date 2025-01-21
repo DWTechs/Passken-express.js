@@ -9,6 +9,7 @@
 - [Installation](#installation)
 - [Usage](#usage)
   - [ES6](#es6)
+  - [CommonJS](#commonjs)
 - [API Reference](#api-reference)
 - [Contributors](#contributors)
 - [Stack](#stack)
@@ -24,13 +25,13 @@ It uses @dwtechs/passken and brings Express middlewares for direct use in a node
 - Very lightweight
 - Thoroughly tested
 - Works in Javascript and Typescript
-- Can be used as EcmaScrypt module
+- Can be used as CommonJS or EcmaScrypt module
 - Written in Typescript
 
 
 ## Support
 
-- node: 26
+- node: 16
 
 This is the oldest targeted versions. The library should work properly on older versions of Node.js but we do not support it officially.  
 
@@ -38,7 +39,7 @@ This is the oldest targeted versions. The library should work properly on older 
 ## Installation
 
 ```bash
-$ npm i @dwtechs/winstan-plugin-express-perf
+$ npm i @dwtechs/passken-express
 ```
 
 
@@ -49,9 +50,9 @@ $ npm i @dwtechs/winstan-plugin-express-perf
 
 ```javascript
 
-import express from "express";
 import pwd from "@dwtechs/passken-express";
-import pg from "@internal/pgsql";
+import express from "express";
+const router = express.Router();
 
 import user from "../controllers/user.js";
 import mail from "../controllers/mail.js";
