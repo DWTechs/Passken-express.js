@@ -51,7 +51,7 @@ function compare(req: Request, res: MyResponse, next: NextFunction) {
 /**
  * Generates random passwords for multiple users and encrypts them.
  */
-function create(req: Request, _res: Response, next: NextFunction): void {
+function create(req: Request, _res: Response, next: NextFunction) {
   
   log.debug("create password");
   
