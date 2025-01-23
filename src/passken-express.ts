@@ -1,26 +1,11 @@
-import { compare as comp, encrypt, create as createPwd } from "@dwtechs/passken";
+import { isArray } from "@dwtechs/checkard";
+import { compare as comparePwd, encrypt, create as createPwd } from "@dwtechs/passken";
 import { log } from "@dwtechs/winstan";
 import type { Request, Response, NextFunction } from 'express';
 
 const { 
-  PWD_AUTO_LENGTH,
-  PWD_AUTO_NUMBERS,
-  PWD_AUTO_UPPERCASE,
-  PWD_AUTO_LOWERCASE,
-  PWD_AUTO_SYMBOLS,
-  PWD_AUTO_STRICT,
-  PWD_AUTO_EXCLUDE_SIMILAR_CHARS,
   PWD_SECRET,
 } = process.env;
-const conf ={
-  len: PWD_AUTO_LENGTH as unknown as number,
-  num: PWD_AUTO_NUMBERS as unknown as boolean,
-  ucase: PWD_AUTO_UPPERCASE as unknown as boolean,
-  lcase: PWD_AUTO_LOWERCASE as unknown as boolean,
-  sym: PWD_AUTO_SYMBOLS as unknown as boolean,
-  strict: PWD_AUTO_STRICT as unknown as boolean,
-  exclSimilarChars: PWD_AUTO_EXCLUDE_SIMILAR_CHARS as unknown as boolean,
-};
 
 if (!PWD_SECRET) {
   throw new Error("Missing PWD_SECRET environment variable");
@@ -28,7 +13,9 @@ if (!PWD_SECRET) {
 
 
 interface MyResponse extends Response {
-  rows: any[];
+  rows?: any[];
+  password?: string;
+  pwd?: string;
 }
 
 /**
@@ -38,27 +25,45 @@ interface MyResponse extends Response {
  * If the password is incorrect or missing, it calls next() with an error status and message.
  */
 function compare(req: Request, res: MyResponse, next: NextFunction) {
-  const pwd = req.body.pwd; // from request
-  const dbHash = res.rows[0].password; //from db
+  
+  const pwd = req.body?.password || req.body?.pwd; // from request
+  if (!pwd) 
+    return next({ status: 400, msg: "Missing password in the request. Should be in req.body.password or req.body.pwd" });
+  
+  let dbHash = null
+  if (isArray(res.rows, ">", 0)){
+    const row = res.rows[0];
+    dbHash = row?.password || row?.pwd; //from db
+  } else 
+    dbHash = res?.password || res?.pwd;
+  if (!dbHash) 
+    return next({ status: 400, msg: "Missing hash from the database. Should be in res.rows[0].password or res.rows[0].pwd or res.password or res.pwd" });
+  
   log.debug(`Compare Passwords: pwd=${!!pwd}, dbHash=${!!dbHash}`);
-  if (comp(pwd, dbHash, PWD_SECRET as string)) {
+  if (comparePwd(pwd, dbHash, PWD_SECRET as string)) {
     log.debug("Correct password");
     return next();
   }
   next({ status: 401, msg: "Wrong password" });
+
 }
 
 /**
  * Generates random passwords for multiple users and encrypts them.
  */
 function create(req: Request, _res: Response, next: NextFunction): void {
-  log.debug("create passwords");
+  
+  log.debug("create password");
+  
+  if (!isArray(req.body?.rows, ">", 0))
+    return next({ status: 400, msg: "Missing resources. Should be in req.body.rows" });
 
-  for (const u of req.body.rows) {
-    u.pwd = createPwd(conf);
-    u.encryptedPwd = encrypt(u.pwd, PWD_SECRET as string);
+  for (const r of req.body.rows) {
+    r.pwd = createPwd();
+    r.encryptedPwd = encrypt(r.pwd, PWD_SECRET as string);
   }
   next();
+  
 }
 
 export default {

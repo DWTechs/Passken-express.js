@@ -10,6 +10,7 @@
 - [Usage](#usage)
   - [ES6](#es6)
   - [CommonJS](#commonjs)
+  - [Configure](#configure)
 - [API Reference](#api-reference)
 - [Contributors](#contributors)
 - [Stack](#stack)
@@ -18,9 +19,7 @@
 ## Synopsis
 
 **[Passken-express.js](https://github.com/DWTechs/Passken-express.js)** is an open source password management library for Express.js.  
-It uses @dwtechs/passken and brings Express middlewares for direct use in a node.js service.
-
-**This plugin will log the time it took to process a request.**
+It uses @dwtechs/passken and adds Express middlewares for direct use in a node.js service.
 
 - Very lightweight
 - Thoroughly tested
@@ -56,21 +55,65 @@ const router = express.Router();
 
 import user from "../controllers/user.js";
 import mail from "../controllers/mail.js";
+import token from "../controllers/token.js";
 
+// middleware sub-stacks
+
+// add users
 const addMany = [
   user.validate,
   pwd.create,
   user.addMany,
-  pg.beginTransaction,
-  pg.addMany,
   mail.sendRegistration,
-  pg.commitTransaction,
 ];
+
+// Login user
+const login = [
+  token.validate,
+  user.getPwd,
+  pwd.compare,
+  user.isActive,
+];
+
+
+
+// Routes
+
+// log a user with his email & password
+router.post("/", login);
 
 // Add new users
 router.post("/", addMany);
 
 ```
+
+### Password Comparison
+
+The method will look for a password value from the client request :  
+
+```Javascript
+const pwd = req.body?.password || req.body?.pwd.
+```
+
+It will then look for the hashed password stored in the database :
+
+```Javascript
+const hash = res.rows[0].password || res.rows[0].pwd || res.password || res.pwd;
+```
+
+It will throw an error if the password or the hash are missing.
+It will throw an error if the password does not match the hash. 
+
+
+### Password creation
+
+The method will loop through an array in **req.body.rows**.
+
+It will throw an error if **req.body.rows** is missing or empty.
+
+New **passwords** will be added into **req.body.rows[i].pwd**.
+Encrypted passwords will be added into **req.body.rows[i].encryptedPwd** .
+
 
 ### Configure
 
