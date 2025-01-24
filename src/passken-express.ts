@@ -43,12 +43,12 @@ function compare(req: Request, res: MyResponse, next: NextFunction) {
     return next({ status: 400, msg: "Passken: Missing hash from the database. Should be in res.rows[0].password or res.rows[0].pwd or res.password or res.pwd" });
   
   log.debug(`Passken: Compare pwd=${!!pwd} & dbHash=${!!dbHash}`);
-  if (pk.compare(pwd, dbHash, PWD_SECRET as string)) {
-    log.debug("Passken: Correct password");
-    return next();
-  }
-  next({ status: 401, msg: "Passken: Wrong password" });
-
+  if (!pk.compare(pwd, dbHash, PWD_SECRET as string))
+    return next({ status: 401, msg: "Passken: Wrong password" });  
+  
+  log.debug("Passken: Correct password");
+  next();
+  
 }
 
 /**
