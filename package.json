@@ -36,7 +36,7 @@
   ],
   "dependencies": {
     "@dwtechs/checkard": "2.29.2",
-    "@dwtechs/passken": "0.1.0",
+    "@dwtechs/passken": "0.2.0",
     "@dwtechs/winstan": "0.3.0"
   },
   "devDependencies": {

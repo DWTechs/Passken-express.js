@@ -1,21 +1,24 @@
 import { isArray } from "@dwtechs/checkard";
-import { compare as comparePwd, encrypt, create as createPwd } from "@dwtechs/passken";
+import * as pk from "@dwtechs/passken";
 import { log } from "@dwtechs/winstan";
+import type { Options } from "@dwtechs/passken";
 import type { Request, Response, NextFunction } from 'express';
 
-const { 
-  PWD_SECRET,
-} = process.env;
+const { PWD_SECRET } = process.env;
 
-if (!PWD_SECRET) {
-  throw new Error("Missing PWD_SECRET environment variable");
-}
+if (!PWD_SECRET)
+  throw new Error("Passken: Missing PWD_SECRET environment variable");
 
+let Options: Options | null = null;
 
 interface MyResponse extends Response {
   rows?: any[];
   password?: string;
   pwd?: string;
+}
+
+function init(options: Options): void {
+  Options = options;
 }
 
 /**
@@ -28,7 +31,7 @@ function compare(req: Request, res: MyResponse, next: NextFunction) {
   
   const pwd = req.body?.password || req.body?.pwd; // from request
   if (!pwd) 
-    return next({ status: 400, msg: "Missing password in the request. Should be in req.body.password or req.body.pwd" });
+    return next({ status: 400, msg: "Passken: Missing password in the request. Should be in req.body.password or req.body.pwd" });
   
   let dbHash = null
   if (isArray(res.rows, ">", 0)){
@@ -37,14 +40,14 @@ function compare(req: Request, res: MyResponse, next: NextFunction) {
   } else 
     dbHash = res?.password || res?.pwd;
   if (!dbHash) 
-    return next({ status: 400, msg: "Missing hash from the database. Should be in res.rows[0].password or res.rows[0].pwd or res.password or res.pwd" });
+    return next({ status: 400, msg: "Passken: Missing hash from the database. Should be in res.rows[0].password or res.rows[0].pwd or res.password or res.pwd" });
   
-  log.debug(`Compare Passwords: pwd=${!!pwd}, dbHash=${!!dbHash}`);
-  if (comparePwd(pwd, dbHash, PWD_SECRET as string)) {
-    log.debug("Correct password");
+  log.debug(`Passken: Compare pwd=${!!pwd} & dbHash=${!!dbHash}`);
+  if (pk.compare(pwd, dbHash, PWD_SECRET as string)) {
+    log.debug("Passken: Correct password");
     return next();
   }
-  next({ status: 401, msg: "Wrong password" });
+  next({ status: 401, msg: "Passken: Wrong password" });
 
 }
 
@@ -53,20 +56,21 @@ function compare(req: Request, res: MyResponse, next: NextFunction) {
  */
 function create(req: Request, _res: Response, next: NextFunction) {
   
-  log.debug("create password");
+  log.debug("Passken: Create password");
   
   if (!isArray(req.body?.rows, ">", 0))
-    return next({ status: 400, msg: "Missing resources. Should be in req.body.rows" });
+    return next({ status: 400, msg: "Passken: Missing resources. Should be in req.body.rows" });
 
   for (const r of req.body.rows) {
-    r.pwd = createPwd();
-    r.encryptedPwd = encrypt(r.pwd, PWD_SECRET as string);
+    r.pwd = pk.create();
+    r.encryptedPwd = pk.encrypt(r.pwd, PWD_SECRET as string);
   }
   next();
   
 }
 
-export default {
+export {
+  init,
   compare,
   create,
 };

@@ -9,9 +9,11 @@
 - [Installation](#installation)
 - [Usage](#usage)
   - [ES6](#es6)
-  - [CommonJS](#commonjs)
   - [Configure](#configure)
+  - [Environment variables](#environment-variables)
 - [API Reference](#api-reference)
+- [options](#options)
+- [Logs](#logs)
 - [Contributors](#contributors)
 - [Stack](#stack)
 
@@ -32,7 +34,7 @@ It uses @dwtechs/passken and adds Express middlewares for direct use in a node.j
 
 - node: 16
 
-This is the oldest targeted versions. The library should work properly on older versions of Node.js but we do not support it officially.  
+This is the oldest targeted versions. The library may work properly on older versions of Node.js but we do not support it officially.  
 
 
 ## Installation
@@ -49,7 +51,7 @@ $ npm i @dwtechs/passken-express
 
 ```javascript
 
-import pwd from "@dwtechs/passken-express";
+import * as pk from "@dwtechs/passken-express";
 import express from "express";
 const router = express.Router();
 
@@ -57,12 +59,23 @@ import user from "../controllers/user.js";
 import mail from "../controllers/mail.js";
 import token from "../controllers/token.js";
 
+const passwordOptions = {
+  len: 14,
+  num: true,
+  ucase: false,
+  lcase: false,
+  sym: false,
+  strict: true,
+  exclSimilarChars: true,
+};
+pk.init(passwordOptions);
+
 // middleware sub-stacks
 
 // add users
 const addMany = [
   user.validate,
-  pwd.create,
+  pk.create,
   user.addMany,
   mail.sendRegistration,
 ];
@@ -71,11 +84,9 @@ const addMany = [
 const login = [
   token.validate,
   user.getPwd,
-  pwd.compare,
+  pk.compare,
   user.isActive,
 ];
-
-
 
 // Routes
 
@@ -102,10 +113,9 @@ const hash = res.rows[0].password || res.rows[0].pwd || res.password || res.pwd;
 ```
 
 It will throw an error if the password or the hash are missing.
-It will throw an error if the password does not match the hash. 
+It will throw an error if the password does not match the hash.
 
-
-### Password creation
+### Password generation
 
 The method will loop through an array in **req.body.rows**.
 
@@ -116,6 +126,8 @@ Encrypted passwords will be added into **req.body.rows[i].encryptedPwd** .
 
 
 ### Configure
+
+You do not need to initialise the library using **pwd.init()** if the default config is fine for you.
 
 Passken will start with the following default password configuration : 
 
@@ -131,10 +143,11 @@ Options = {
 };
 ```
 
+
 ### Environment variables
 
-You can update password configuration using the following environment variables :  
-
+You do not need to intialise the library using **pwd.init()** if you are using the following environment variables:
+ 
 ```bash
   PWD_AUTO_LENGTH,
   PWD_AUTO_NUMBERS,
@@ -155,20 +168,60 @@ Note that **PWD_SECRET** is mandatory.
 ## API Reference
 
 
-### Methods
+### Types
 
 ```javascript
 
+type Options = {
+  len: number,
+  num: boolean,
+  ucase: boolean,
+  lcase: boolean,
+  sym: boolean,
+  strict: boolean,
+  exclSimilarChars: boolean,
+};
+
+```
+
+### Methods
+
+```javascript
+// Initialise passwords options
+init(options: Options): void {}
+// Compare a password with a hash
 compare(req: Request, res: MyResponse, next: NextFunction): void {}
+// Create a password
 create(req: Request, res: Response, next: NextFunction): void {}
 
 ```
 
+## Options
+
+Any of these can be passed into the options object for each function.
+
+| Name            |               Description                    |  Default value  |  
+| :-------------- | :------------------------------------------ | :-------------- |
+| len	| Integer, length of password.  |   12 |
+| num*	| Boolean, put numbers in password.  |  true |
+| sym*	| Boolean, put symbols in password.  |	true |
+| lcase*	| Boolean, put lowercase in password   |  true |
+| ucase*	| Boolean, use uppercase letters in password.   |	  true |
+| exclSimilarChars	| Boolean, exclude similar chars, like 'i' and 'l'.	 |  true | 
+| strict	| Boolean, password must include at least one character from each pool.	 |  true |
+
+*At least one of those options must be true.
+
+
+## Logs
+
+Passken-express.js uses **[@dwtechs/Winstan](https://www.npmjs.com/package/@dwtechs/winstan)** library for logging.
+All logs are in debug mode. Meaning they should not appear in production mode.
 
 ## Contributors
 
-Winstan-plugin-express-perf.js is still in development and we would be glad to get all the help you can provide.
-To contribute please read **[contributor.md](https://github.com/DWTechs/Winstan-plugin-express-perf.js/blob/main/contributor.md)** for detailed installation guide.
+Passken-express.js is still in development and we would be glad to get all the help you can provide.
+To contribute please read **[contributor.md](https://github.com/DWTechs/Passken-express.js/blob/main/contributor.md)** for detailed installation guide.
 
 
 ## Stack
