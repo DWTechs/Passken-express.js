@@ -1,9 +1,10 @@
 {
   "name": "@dwtechs/passken-express",
   "version": "0.1.0",
-  "description": "Open source Express performance measurement plugin for Winstan library.",
+  "description": "Open source password management library for Express.js to create, encrypt and compare passwords safely.",
   "keywords": [
-    "perf"
+    "passwords",
+    "Express"
   ],
   "homepage": "https://github.com/DWTechs/passken-express.js",
   "main": "dist/passken-express",
