@@ -6,7 +6,9 @@ const config =  {
     format: "es"
   },
   external: [
-    "@dwtechs/passken", "@dwtechs/winstan"
+    "@dwtechs/checkard", 
+    "@dwtechs/passken", 
+    "@dwtechs/winstan",
   ],
   plugins: []
 };
