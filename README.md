@@ -20,19 +20,19 @@
 
 ## Synopsis
 
-**[Passken-express.js](https://github.com/DWTechs/Passken-express.js)** is an open source password management library for Express.js.  
+**[Passken-express.js](https://github.com/DWTechs/Passken-express.js)** is an open source password and JWT management library for Express.js.  
 It uses @dwtechs/passken and adds Express middlewares for direct use in a node.js service.
 
 - Very lightweight
 - Thoroughly tested
+- Imported as EcmaScrypt module
 - Works in Javascript and Typescript
-- Can be used as CommonJS or EcmaScrypt module
 - Written in Typescript
 
 
 ## Support
 
-- node: 16
+- node: 22
 
 This is the oldest targeted versions. The library may work properly on older versions of Node.js but we do not support it officially.  
 
@@ -66,7 +66,7 @@ const passwordOptions = {
   lcase: false,
   sym: false,
   strict: true,
-  exclSimilarChars: true,
+  similarChars: true,
 };
 pk.init(passwordOptions);
 
@@ -139,7 +139,7 @@ Options = {
   lcase: true,
   sym: false,
   strict: true,
-  exclSimilarChars: true,
+  similarChars: false,
 };
 ```
 
@@ -149,14 +149,17 @@ Options = {
 You do not need to intialise the library using **pwd.init()** if you are using the following environment variables:
  
 ```bash
-  PWD_AUTO_LENGTH,
-  PWD_AUTO_NUMBERS,
-  PWD_AUTO_UPPERCASE,
-  PWD_AUTO_LOWERCASE,
-  PWD_AUTO_SYMBOLS,
-  PWD_AUTO_STRICT,
-  PWD_AUTO_EXCLUDE_SIMILAR_CHARS,
+  PWD_LENGTH,
+  PWD_NUMBERS,
+  PWD_UPPERCASE,
+  PWD_LOWERCASE,
+  PWD_SYMBOLS,
+  PWD_STRICT,
+  PWD_SIMILAR_CHARS,
   PWD_SECRET,
+  ACCESS_TOKEN_DURATION, 
+  REFRESH_TOKEN_DURATION
+  TOKEN_SECRET,
 ```
 
 These environment variables will update the default values of the lib at start up.
@@ -179,7 +182,7 @@ type Options = {
   lcase: boolean,
   sym: boolean,
   strict: boolean,
-  exclSimilarChars: boolean,
+  similarChars: boolean,
 };
 
 ```
@@ -187,12 +190,13 @@ type Options = {
 ### Methods
 
 ```javascript
+
 // Initialise passwords options
-init(options: Options): void {}
+function init(options: Options): void {}
 // Compare a password with a hash
-compare(req: Request, res: MyResponse, next: NextFunction): void {}
+function compare(req: Request, res: MyResponse, next: NextFunction): void {}
 // Create a password
-create(req: Request, res: Response, next: NextFunction): void {}
+function create(req: Request, res: Response, next: NextFunction): void {}
 
 ```
 
@@ -200,27 +204,27 @@ create(req: Request, res: Response, next: NextFunction): void {}
 
 Any of these can be passed into the options object for each function.
 
-| Name            |               Description                    |  Default value  |  
-| :-------------- | :------------------------------------------ | :-------------- |
-| len	| Integer, length of password.  |   12 |
-| num*	| Boolean, put numbers in password.  |  true |
-| sym*	| Boolean, put symbols in password.  |	true |
-| lcase*	| Boolean, put lowercase in password   |  true |
-| ucase*	| Boolean, use uppercase letters in password.   |	  true |
-| exclSimilarChars	| Boolean, exclude similar chars, like 'i' and 'l'.	 |  true | 
-| strict	| Boolean, password must include at least one character from each pool.	 |  true |
+| Name         | type    |              Description                                     | Default |  
+| :----------- | :------ | ------------------------------------------------------------ | :------ |
+| len	         | Integer | length of password.                                          | 12      |
+| num*	       | Boolean | use numbers in password.                                     | true    |
+| sym*	       | Boolean | use symbols in password.                                     | true    |
+| lcase*	     | Boolean | use lowercase in password                                    | true    |
+| ucase*	     | Boolean | use uppercase letters in password.                           | true    |
+| strict	     | Boolean | password must include at least one character from each pool.	| true    |
+| similarChars | Boolean | allow close looking chars like 'l', 'I', '1', 'o', 'O', '0'. | false   |
 
 *At least one of those options must be true.
 
 
 ## Logs
 
-Passken-express.js uses **[@dwtechs/Winstan](https://www.npmjs.com/package/@dwtechs/winstan)** library for logging.
+**Passken-express.js** uses **[@dwtechs/Winstan](https://www.npmjs.com/package/@dwtechs/winstan)** library for logging.
 All logs are in debug mode. Meaning they should not appear in production mode.
 
 ## Contributors
 
-Passken-express.js is still in development and we would be glad to get all the help you can provide.
+**Passken-express.js** is still in development and we would be glad to get all the help you can provide.
 To contribute please read **[contributor.md](https://github.com/DWTechs/Passken-express.js/blob/main/contributor.md)** for detailed installation guide.
 
 
