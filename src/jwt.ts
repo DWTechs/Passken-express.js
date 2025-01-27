@@ -1,4 +1,4 @@
-import * as pk from "@dwtechs/passken";
+import { sign, verify} from "@dwtechs/passken";
 import { isJWT, isValidNumber } from "@dwtechs/checkard";
 import { log } from "@dwtechs/winstan";
 import type { Request, Response, NextFunction } from 'express';
@@ -25,10 +25,9 @@ async function refresh(req: Request, res: MyResponse, next: NextFunction) {
   if (!isValidNumber(iss, 1, 999999999, false))
     return next({ status: 400, msg: "Missing iss" });
 
-  const iat = Math.round(new Date().getTime() / 1000);
   log.debug(`Create tokens for user ${iss}`);
-  const accessToken = pk.sign(iss, iat, ACCESS_TOKEN_DURATION);
-  const refreshToken = pk.sign(iss, iat, REFRESH_TOKEN_DURATION);
+  const accessToken = sign(iss, ACCESS_TOKEN_DURATION, [TOKEN_SECRET]);
+  const refreshToken = sign(iss, REFRESH_TOKEN_DURATION, [TOKEN_SECRET]);
   log.debug(`refreshToken='${refreshToken}', accessToken='${accessToken}'`);
   res.rows = [{ accessToken, refreshToken }];
   next();
@@ -56,7 +55,7 @@ function decodeAccess(req: Request, res: Response, next: NextFunction) {
   const options = { ignoreExpiration };
   let decodedToken = null;
   try {
-    decodedToken = pk.verify(token, TOKEN_SECRET, options);
+    decodedToken = verify(token, [TOKEN_SECRET]);
   } catch (err) {
     return next({
       status: 401,
@@ -92,7 +91,7 @@ async function decodeRefresh(req: Request, res: Response, next: NextFunction) {
   };
   const decodedToken = null;
   try {
-    req.body.decodedToken = pk.verify(token, TOKEN_SECRET, options);
+    req.body.decodedToken = verify(token, [TOKEN_SECRET]);
   } catch (err) {
     return next({
       status: 401,
