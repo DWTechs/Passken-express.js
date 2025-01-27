@@ -205,16 +205,19 @@ function create(req: Request, res: Response, next: NextFunction): void {}
 Any of these can be passed into the options object for each function.
 
 | Name         | type    |              Description                                     | Default |  
-| :----------- | :------ | ------------------------------------------------------------ | :------ |
-| len	         | Integer | length of password.                                          | 12      |
+| :----------- | :------ | :----------------------------------------------------------- | :------ |
+| len	         | Integer | Minimal length of password.                                  | 12      |
 | num*	       | Boolean | use numbers in password.                                     | true    |
-| sym*	       | Boolean | use symbols in password.                                     | true    |
+| sym*	       | Boolean | use symbols in password                                      | true    |
 | lcase*	     | Boolean | use lowercase in password                                    | true    |
 | ucase*	     | Boolean | use uppercase letters in password.                           | true    |
 | strict	     | Boolean | password must include at least one character from each pool.	| true    |
-| similarChars | Boolean | allow close looking chars like 'l', 'I', '1', 'o', 'O', '0'. | false   |
+| similarChars | Boolean | allow close looking chars.                                   | false   | 
 
-*At least one of those options must be true.
+*At least one of those options must be true.  
+
+Symbols used : !@#%*_-+=:;?><,./()
+Similar characters : l, I, 1, o, O, 0
 
 
 ## Logs
