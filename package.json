@@ -36,7 +36,7 @@
     "dist/"
   ],
   "dependencies": {
-    "@dwtechs/checkard": "2.29.2",
+    "@dwtechs/checkard": "3.0.0",
     "@dwtechs/passken": "0.2.0",
     "@dwtechs/winstan": "0.3.0"
   },
