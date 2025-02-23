@@ -21,7 +21,7 @@
 ## Synopsis
 
 **[Passken-express.js](https://github.com/DWTechs/Passken-express.js)** is an open source password and JWT management library for Express.js.  
-It uses @dwtechs/passken and adds Express middlewares for direct use in a node.js service.
+It uses @dwtechs/passken and adds Express middlewares to be used in a node.js service.
 
 - Very lightweight
 - Thoroughly tested
@@ -34,7 +34,8 @@ It uses @dwtechs/passken and adds Express middlewares for direct use in a node.j
 
 - node: 22
 
-This is the oldest targeted versions. The library may work properly on older versions of Node.js but we do not support it officially.  
+This is the oldest targeted versions.  
+The library uses node:crypto.   
 
 
 ## Installation
@@ -58,6 +59,7 @@ const router = express.Router();
 import user from "../controllers/user.js";
 import mail from "../controllers/mail.js";
 import token from "../controllers/token.js";
+import consumer from "../controllers/consumer.js";
 
 const passwordOptions = {
   len: 14,
@@ -75,7 +77,7 @@ pk.init(passwordOptions);
 // add users
 const addMany = [
   user.validate,
-  pk.create,
+  pk.randomPwd,
   user.addMany,
   mail.sendRegistration,
 ];
@@ -86,6 +88,21 @@ const login = [
   user.getPwd,
   pk.compare,
   user.isActive,
+];
+
+const addConsumer = [
+  consumer.validate,
+  pk.refresh,
+  consumer.addOne
+];
+
+const refresh = [
+  consumer.validate,
+  pk.decodeAccess,
+  pk.decodeRefresh,
+  consumer.match,
+  pk.refresh,
+  consumer.updateOne,
 ];
 
 // Routes
@@ -165,7 +182,7 @@ You do not need to intialise the library using **pwd.init()** if you are using t
 These environment variables will update the default values of the lib at start up.
 So you do not need to init the library in the code.
 
-Note that **PWD_SECRET** is mandatory.
+Note that **PWD_SECRET** and **TOKEN_SECRET** are mandatory.
 
 
 ## API Reference

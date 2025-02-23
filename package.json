@@ -26,6 +26,7 @@
   "contributors": [],
   "scripts": {
     "start": "",
+    "prebuild": "npm install",
     "build": "node ./scripts/clear && tsc && npm run rollup && node ./scripts/copy && npm run test",
     "rollup:mjs": "rollup --config rollup.config.mjs",
     "rollup:cjs": "rollup --config rollup.config.cjs.mjs",
@@ -36,8 +37,8 @@
     "dist/"
   ],
   "dependencies": {
-    "@dwtechs/checkard": "3.0.0",
-    "@dwtechs/passken": "0.2.0",
+    "@dwtechs/checkard": "3.2.2",
+    "@dwtechs/passken": "0.2.1",
     "@dwtechs/winstan": "0.3.0"
   },
   "devDependencies": {

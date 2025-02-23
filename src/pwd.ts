@@ -1,4 +1,4 @@
-import { isArray } from "@dwtechs/checkard";
+import { isArray, isString, isProperty } from "@dwtechs/checkard";
 import * as pk from "@dwtechs/passken";
 import { log } from "@dwtechs/winstan";
 import type { Options } from "@dwtechs/passken";
@@ -10,11 +10,10 @@ const { PWD_SECRET } = process.env;
 if (!PWD_SECRET)
   throw new Error("Passken: Missing PWD_SECRET environment variable");
 
-let Options: Options | null = null;
-
+let Opts: Options | undefined = undefined;
 
 function init(options: Options): void {
-  Options = options;
+  Opts = options;
 }
 
 /**
@@ -29,10 +28,13 @@ function compare(req: Request, res: MyResponse, next: NextFunction) {
   if (!pwd) 
     return next({ status: 400, msg: "Passken: Missing password in the request. Should be in req.body.password or req.body.pwd" });
   
-  let dbHash = null
+  let dbHash: string | undefined = undefined;
   if (isArray(res.rows, ">", 0)) {
     const row = res.rows[0];
-    dbHash = row?.password || row?.pwd; //from db
+    if (isProperty(row, "password", true, true) && isString(row.password, "!0"))
+      dbHash = row.password;
+    else if (isProperty(row, "pwd", true, true) && isString(row.pwd, "!0"))
+      dbHash = row.pwd;
   } else 
     dbHash = res?.password || res?.pwd;
   if (!dbHash) 
@@ -58,7 +60,7 @@ function create(req: Request, _res: Response, next: NextFunction) {
     return next({ status: 400, msg: "Passken: Missing resources. Should be in req.body.rows" });
 
   for (const r of req.body.rows) {
-    r.pwd = pk.create();
+    r.pwd = pk.randomPwd(Opts);
     r.encryptedPwd = pk.encrypt(r.pwd, PWD_SECRET as string);
   }
   next();

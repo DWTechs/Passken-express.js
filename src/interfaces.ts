@@ -1,5 +1,5 @@
 export interface MyResponse extends Response {
-  rows?: any[];
+  rows?: object[];
   password?: string;
   pwd?: string;
 }
