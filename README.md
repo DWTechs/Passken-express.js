@@ -207,13 +207,13 @@ function decodeRefresh(req: Request, _res: Response, next: NextFunction): void {
 The function will look for a password value from the client request body :  
 
 ```Javascript
-  const pwd = req.body?.password || req.body?.pwd.
+const pwd = req.body?.password || req.body?.pwd.
 ```
 
 It will then look for the hashed password stored in the database :
 
 ```Javascript
-  const hash = res.rows[0].password || res.rows[0].pwd || res.password || res.pwd;
+const hash = res.rows[0].password || res.rows[0].pwd || res.password || res.pwd;
 ```
 
 It will throw an error if the password or the hash are missing.
@@ -233,13 +233,13 @@ Encrypted passwords will be added into **req.body.rows[i].encryptedPwd** .
 This function will look for an ISS in the client request body :
 
 ```Javascript
-  const iss = req.body.decodedAccessToken?.iss || req.body?.id?.toString();
+const iss = req.body.decodedAccessToken?.iss || req.body?.id?.toString();
 ```
 
 It will then send both new refresh and access tokens in the res object.
 
 ```Javascript
-  res.rows = [{ accessToken, refreshToken }];
+res.rows = [{ accessToken, refreshToken }];
 ```
 
 ### JWT Decoding
@@ -247,26 +247,26 @@ It will then send both new refresh and access tokens in the res object.
 decodeAccess() functions will look for a token in the client request body.
 
 ```Javascript
-  const token = req.body.accessToken;
-  const ignoreExpiration = req.body.ignoreExpiration || false;
+const token = req.body.accessToken;
+const ignoreExpiration = req.body.ignoreExpiration || false;
 ```
 
 It will then send the decoded token in the res object.
 
 ```Javascript
-  req.body.decodedAccessToken = decodedToken;
+req.body.decodedAccessToken = decodedToken;
 ```
 
 decodeRefresh() functions will look for a token in the client request body.
 
 ```Javascript
-  const token = req.body.refreshToken;
+const token = req.body.refreshToken;
 ```
 
 It will then send the decoded token in the res object.
 
 ```Javascript
-  req.body.decodedRefreshToken = decodedToken;
+req.body.decodedRefreshToken = decodedToken;
 ```
 
 
