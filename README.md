@@ -176,7 +176,7 @@ type Options = {
 
 ```
 
-### PWD Methods
+### PWD Functions
 
 ```javascript
 
@@ -189,7 +189,7 @@ function create(req: Request, res: Response, next: NextFunction): void {}
 
 ```
 
-### JWT Methods
+### JWT Functions
 
 ```javascript
 
