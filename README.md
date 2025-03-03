@@ -262,11 +262,11 @@ function create(req: Request, res: Response, next: NextFunction): void {}
 ```javascript
 
 // Refresh the JWT tokens for a user.
-function refresh(req: Request, res: MyResponse, next: NextFunction): Promise<void>;
+function refresh(req: Request, res: MyResponse, next: NextFunction): void {}
 // Decode and verify a JWT access token from the request body.
-function decodeAccess(req: Request, _res: Response, next: NextFunction): void;
+function decodeAccess(req: Request, _res: Response, next: NextFunction): void {}
 // Decode and verify a refresh token from the request body
-function decodeRefresh(req: Request, _res: Response, next: NextFunction): Promise<void>;
+function decodeRefresh(req: Request, _res: Response, next: NextFunction): void {}
 
 ```
 
