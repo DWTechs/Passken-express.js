@@ -21,7 +21,7 @@
 ## Synopsis
 
 **[Passken-express.js](https://github.com/DWTechs/Passken-express.js)** is an open source password and JWT management library for Express.js.  
-It uses @dwtechs/passken and adds Express middlewares to be used in a node.js service.
+It includes @dwtechs/passken and adds Express middlewares to be used in a node.js service.
 
 - Very lightweight
 - Thoroughly tested
@@ -58,7 +58,6 @@ const router = express.Router();
 
 import user from "../controllers/user.js";
 import mail from "../controllers/mail.js";
-import token from "../controllers/token.js";
 import consumer from "../controllers/consumer.js";
 
 const passwordOptions = {
@@ -204,7 +203,7 @@ type Options = {
 
 ```
 
-### Methods
+### PWD Methods
 
 ```javascript
 
@@ -217,7 +216,21 @@ function create(req: Request, res: Response, next: NextFunction): void {}
 
 ```
 
-## Options
+### JWT Methods
+
+```javascript
+
+// Refresh the JWT tokens for a user.
+function refresh(req: Request, res: MyResponse, next: NextFunction): Promise<void>;
+// Decode and verify a JWT access token from the request body.
+function decodeAccess(req: Request, _res: Response, next: NextFunction): void;
+// Decode and verify a refresh token from the request body
+function decodeRefresh(req: Request, _res: Response, next: NextFunction): Promise<void>;
+
+```
+
+
+## PWD Options
 
 Any of these can be passed into the options object for each function.
 

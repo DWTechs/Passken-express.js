@@ -24,7 +24,7 @@ SOFTWARE.
 https://github.com/DWTechs/Passken-express.js
 */
 
-import { isArray, isProperty, isString, isValidNumber, isNumber, isJWT } from '@dwtechs/checkard';
+import { isArray, isProperty, isString, isNumber, isValidNumber, isJWT } from '@dwtechs/checkard';
 import * as pk from '@dwtechs/passken';
 import { sign, verify } from '@dwtechs/passken';
 import { log } from '@dwtechs/winstan';
@@ -83,6 +83,11 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
 const { TOKEN_SECRET, ACCESS_TOKEN_DURATION, REFRESH_TOKEN_DURATION } = process.env;
 if (!TOKEN_SECRET)
     throw new Error("Passken: Missing TOKEN_SECRET environment variable");
+if (!isString(TOKEN_SECRET, "!0"))
+    throw new Error("Passken: Invalid TOKEN_SECRET environment variable");
+const secrets = [TOKEN_SECRET];
+const accessDuration = isNumber(ACCESS_TOKEN_DURATION, false) ? ACCESS_TOKEN_DURATION : 600;
+const refreshDuration = isNumber(REFRESH_TOKEN_DURATION, false) ? REFRESH_TOKEN_DURATION : 86400;
 function refresh(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         var _a, _b, _c;
@@ -90,10 +95,8 @@ function refresh(req, res, next) {
         if (!isValidNumber(iss, 1, 999999999, false))
             return next({ status: 400, msg: "Missing iss" });
         log.debug(`Create tokens for user ${iss}`);
-        const accessDuration = isNumber(ACCESS_TOKEN_DURATION, false) ? ACCESS_TOKEN_DURATION : 600;
-        const refreshDuration = isNumber(REFRESH_TOKEN_DURATION, false) ? REFRESH_TOKEN_DURATION : 86400;
-        const accessToken = sign(iss, accessDuration, "access", [TOKEN_SECRET]);
-        const refreshToken = sign(iss, refreshDuration, "refresh", [TOKEN_SECRET]);
+        const accessToken = sign(iss, accessDuration, "access", secrets);
+        const refreshToken = sign(iss, refreshDuration, "refresh", secrets);
         log.debug(`refreshToken='${refreshToken}', accessToken='${accessToken}'`);
         res.rows = [{ accessToken, refreshToken }];
         next();
@@ -109,7 +112,7 @@ function decodeAccess(req, _res, next) {
         return next({ status: 401, msg: "Invalid access token" });
     let decodedToken = null;
     try {
-        decodedToken = verify(token, [TOKEN_SECRET], false);
+        decodedToken = verify(token, secrets, true);
     }
     catch (err) {
         return next({ status: 401, msg: `Invalid access token: ${err}` });
@@ -128,7 +131,7 @@ function decodeRefresh(req, _res, next) {
             return next({ status: 401, msg: "Invalid refresh token" });
         let decodedToken = null;
         try {
-            decodedToken = verify(token, [TOKEN_SECRET], true);
+            decodedToken = verify(token, secrets, false);
         }
         catch (err) {
             return next({ status: 401, msg: `Invalid refresh token: ${err}` });
