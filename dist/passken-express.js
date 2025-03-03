@@ -109,7 +109,7 @@ function decodeAccess(req, _res, next) {
         return next({ status: 401, msg: "Invalid access token" });
     let decodedToken = null;
     try {
-        decodedToken = verify(token, [TOKEN_SECRET]);
+        decodedToken = verify(token, [TOKEN_SECRET], false);
     }
     catch (err) {
         return next({ status: 401, msg: `Invalid access token: ${err}` });
@@ -128,7 +128,7 @@ function decodeRefresh(req, _res, next) {
             return next({ status: 401, msg: "Invalid refresh token" });
         let decodedToken = null;
         try {
-            decodedToken = verify(token, [TOKEN_SECRET]);
+            decodedToken = verify(token, [TOKEN_SECRET], true);
         }
         catch (err) {
             return next({ status: 401, msg: `Invalid refresh token: ${err}` });

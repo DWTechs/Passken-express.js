@@ -26,6 +26,7 @@ https://github.com/DWTechs/Passken-express.js
 
 import type { Request, Response, NextFunction } from 'express';
 import type { Options } from '@dwtechs/passken';
+
 interface MyResponse extends Response {
     rows?: unknown[];
     password?: string;
@@ -47,4 +48,5 @@ export {
   compare,
   create,
 };
+
 
