@@ -12,7 +12,7 @@
   - [Configure](#configure)
   - [Environment variables](#environment-variables)
 - [API Reference](#api-reference)
-- [options](#options)
+- [options](#pwd-options)
 - [Logs](#logs)
 - [Contributors](#contributors)
 - [Stack](#stack)
