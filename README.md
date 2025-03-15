@@ -76,7 +76,7 @@ pk.init(passwordOptions);
 // add users
 const addMany = [
   user.validate,
-  pk.randomPwd,
+  pk.create,
   user.addMany,
   mail.sendRegistration,
 ];
