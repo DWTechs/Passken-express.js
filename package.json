@@ -1,6 +1,6 @@
 {
   "name": "@dwtechs/passken-express",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Open source password management library for Express.js to create, encrypt and compare passwords safely.",
   "keywords": [
     "passwords",
@@ -38,7 +38,7 @@
   ],
   "dependencies": {
     "@dwtechs/checkard": "3.2.2",
-    "@dwtechs/passken": "0.2.5",
+    "@dwtechs/passken": "0.4.0",
     "@dwtechs/winstan": "0.3.0"
   },
   "devDependencies": {

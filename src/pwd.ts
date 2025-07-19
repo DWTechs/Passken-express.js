@@ -26,7 +26,7 @@ function compare(req: Request, res: MyResponse, next: NextFunction) {
   
   const pwd = req.body?.password || req.body?.pwd; // from request
   if (!pwd) 
-    return next({ status: 400, msg: "Passken: Missing password in the request. Should be in req.body.password or req.body.pwd" });
+    return next({ statusCode: 400, message: "Passken: Missing password in the request. Should be in req.body.password or req.body.pwd" });
   
   let dbHash: string | undefined = undefined;
   if (isArray(res.rows, ">", 0)) {
@@ -38,12 +38,12 @@ function compare(req: Request, res: MyResponse, next: NextFunction) {
   } else 
     dbHash = res?.password || res?.pwd;
   if (!dbHash) 
-    return next({ status: 400, msg: "Passken: Missing hash from the database. Should be in res.rows[0].password or res.rows[0].pwd or res.password or res.pwd" });
+    return next({ statusCode: 400, message: "Passken: Missing hash from the database. Should be in res.rows[0].password or res.rows[0].pwd or res.password or res.pwd" });
   
   log.debug(`Passken: Compare pwd=${!!pwd} & dbHash=${!!dbHash}`);
   if (!pk.compare(pwd, dbHash, PWD_SECRET as string))
-    return next({ status: 401, msg: "Passken: Wrong password" });  
-  
+    return next({ statusCode: 401, message: "Passken: Wrong password" });
+
   log.debug("Passken: Correct password");
   next();
   
@@ -57,7 +57,7 @@ function create(req: Request, _res: Response, next: NextFunction) {
   log.debug("Passken: Create password");
   
   if (!isArray(req.body?.rows, ">", 0))
-    return next({ status: 400, msg: "Passken: Missing resources. Should be in req.body.rows" });
+    return next({ statusCode: 400, message: "Passken: Missing resources. Should be in req.body.rows" });
 
   for (const r of req.body.rows) {
     r.pwd = pk.randomPwd(Opts);

@@ -1,4 +1,4 @@
-import { sign, verify} from "@dwtechs/passken";
+import { sign, verify, parseBearer } from "@dwtechs/passken";
 import { isJWT, isNumber, isString, isValidNumber } from "@dwtechs/checkard";
 import { log } from "@dwtechs/winstan";
 import type { Request, Response, NextFunction } from 'express';
@@ -6,8 +6,8 @@ import type { MyResponse } from "./interfaces";
 
 const { 
   TOKEN_SECRET, 
-  ACCESS_TOKEN_DURATION, 
-  REFRESH_TOKEN_DURATION 
+  ACCESS_TOKEN_DURATION,
+  REFRESH_TOKEN_DURATION
 } = process.env;
 
 if (!TOKEN_SECRET)
@@ -39,7 +39,7 @@ async function refresh(req: Request, res: MyResponse, next: NextFunction) {
   const iss = req.body.decodedAccessToken?.iss || req.body?.id?.toString();
 
   if (!isValidNumber(iss, 1, 999999999, false))
-    return next({ status: 400, msg: "Missing iss" });
+    return next({ statusCode: 400, message: "Passken: Missing iss" });
 
   log.debug(`Create tokens for user ${iss}`);
   const accessToken = sign(iss, accessDuration, "access", secrets);
@@ -50,43 +50,64 @@ async function refresh(req: Request, res: MyResponse, next: NextFunction) {
 }
 
 
+
 /**
- * Middleware function to decode and verify a JWT access token from the request body.
+ * Express middleware function to decode and verify an access token from the Authorization header.
  * 
- * @param req - The Express request object.
- * @param _res - The Express response object (unused).
- * @param next - The next middleware function in the stack.
+ * This middleware extracts the JWT access token from the Authorization header, validates its format,
+ * verifies its signature, and attaches the decoded token to the request body for use by subsequent
+ * middleware. It only processes requests that have `req.body.protected` set to true.
  * 
- * The function performs the following steps:
- * 1. Checks if the route requires JWT protection. If not, it calls `next()` to proceed to the next middleware.
- * 2. Extracts the access token and the ignoreExpiration flag from the request body.
- * 3. Logs the token and ignoreExpiration flag for debugging purposes.
- * 4. Validates if the token is a valid JWT. If not, it calls `next()` with a 401 status and an error message.
- * 5. Attempts to verify the token using the `verify` function. If verification fails, it calls `next()` with a 401 status and an error message.
- * 6. Checks if the `iss` (issuer) field in the decoded token is a valid number within the specified range. If not, it calls `next()` with a 400 status and an error message.
- * 7. Logs the decoded token for debugging purposes.
- * 8. Attaches the decoded token to the request body and calls `next()` to proceed to the next middleware.
+ * @param {Request} req - The Express request object containing the Authorization header and body
+ * @param {Response} _res - The Express response object (not used in this function)
+ * @param {NextFunction} next - The next middleware function to be called
  * 
- * @throws {Object} - An error object with a status code and message if the token is invalid or missing required fields.
+ * @returns {void} Calls the next middleware function, either with an error or successfully
+ * 
+ * @throws {Object} Will call next() with appropriate status codes based on error types
+ * 
+ * @example
+ * ```typescript
+ * // Usage in Express route
+ * app.post('/protected-route', decodeAccess, (req, res) => {
+ *   // Access the decoded token
+ *   const userId = req.body.decodedAccessToken.iss;
+ *   res.json({ message: `Hello user ${userId}` });
+ * });
+ * 
+ * // Request headers should include:
+ * // Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ * // Request body should include:
+ * // { "protected": true }
+ * ```
+ * 
  */
 function decodeAccess(req: Request, _res: Response, next: NextFunction) {
   if (!req.body.protected) return next(); // if no jwt protection for this route
-  const token = req.body.accessToken;
-  const ignoreExpiration = req.body.ignoreExpiration || false;
-  log.debug(`decodeAccess(token=${token}, ignoreExpiration=${ignoreExpiration})`);
+  
+  log.debug(`decode access token`);
 
-  if (!isJWT(token)) 
-    return next({status: 401, msg: "Invalid access token"});
+  let t: string;
+  try {
+    t = parseBearer(req.headers.authorization);
+  } catch (e: any) {
+    return next(e);
+  }
+
+  log.debug(`accessToken : ${t}`);
+
+  if (!isJWT(t)) 
+    return next({statusCode: 401, message: "Passken: Invalid access token"});
 
   let decodedToken = null;
   try {
-    decodedToken = verify(token, secrets, true);
-  } catch (err) {
-    return next({status: 401, msg: `Invalid access token: ${err}`});
+    decodedToken = verify(t, secrets, true);
+  } catch (e: any) {
+    return next(e);
   }
 
   if (!isValidNumber(decodedToken.iss, 1, 999999999, false))
-    return next({ status: 400, msg: "Missing iss" });
+    return next({ statusCode: 400, message: "Passken: Missing iss" });
 
   log.debug(`Decoded access token : ${JSON.stringify(decodedToken)}`);
   req.body.decodedAccessToken = decodedToken;
@@ -103,25 +124,24 @@ function decodeAccess(req: Request, _res: Response, next: NextFunction) {
  * 
  * @returns Calls the next middleware function with an error object if the token is invalid or missing required fields.
  * 
- * @throws Will call the next middleware with a 401 status and an error message if the token is invalid.
- * @throws Will call the next middleware with a 400 status and an error message if the token is missing the 'iss' field.
+ * @throws Will call the next middleware with appropriate status codes based on error types.
  */
 async function decodeRefresh(req: Request, _res: Response, next: NextFunction) {
   const token = req.body.refreshToken;
   log.debug(`decodeRefresh(token=${token})`);
 
   if (!isJWT(token)) 
-    return next({status: 401, msg: "Invalid refresh token"});
+    return next({statusCode: 401, message: "Passken: Invalid refresh token"});
 
   let decodedToken = null;
   try {
     decodedToken = verify(token, secrets, false);
-  } catch (err) {
-    return next({status: 401,msg: `Invalid refresh token: ${err}`});
+  } catch (e: any) {
+    return next(e);
   }
 
   if (!isValidNumber(decodedToken.iss, 1, 999999999, false))
-    return next({ status: 400, msg: "Missing iss" });
+    return next({ statusCode: 400, message: "Passken: Missing iss" });
 
   log.debug(`Decoded refresh token : ${JSON.stringify(req.body.decodedToken)}`);
   req.body.decodedRefreshToken = decodedToken;
