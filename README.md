@@ -180,11 +180,121 @@ type Options = {
 
 ```javascript
 
-// Initialise passwords options
+/**
+ * Initializes the password generation options for the Passken-express library.
+ * 
+ * This function sets the global password options that will be used by the `create` function
+ * when generating random passwords. The options control password characteristics such as
+ * length, character sets, and complexity requirements.
+ * 
+ * @param {Options} options - Password generation options from @dwtechs/passken
+ * @param {number}  options.len - Password length (minimum characters)
+ * @param {boolean} options.num - Include numbers in password
+ * @param {boolean} options.ucase - Include uppercase letters
+ * @param {boolean} options.lcase - Include lowercase letters  
+ * @param {boolean} options.sym - Include symbols in password
+ * @param {boolean} options.strict - Password must include at least one character from each enabled pool
+ * @param {boolean} options.similarChars - Allow visually similar characters (l, I, 1, o, O, 0)
+ * 
+ * @returns {void}
+ * 
+ * @example
+ * ```typescript
+ * import { init } from '@dwtechs/passken-express';
+ * 
+ * // Initialize with custom password options
+ * init({
+ *   len: 16,
+ *   num: true,
+ *   ucase: true,
+ *   lcase: true,
+ *   sym: true,
+ *   strict: true,
+ *   similarChars: false
+ * });
+ * ```
+ */
 function init(options: Options): void {}
-// Compare a password with a hash
+
+/**
+ * Express middleware to compare a user-provided password with a stored hashed password.
+ * 
+ * This middleware validates that a plaintext password from the request matches a hashed
+ * password from the database. It extracts the password from the request body and the
+ * hash from either the response rows or response object, then uses Passken's secure
+ * comparison function to verify the match.
+ * 
+ * @param {Request} req - Express request object containing the password
+ * @param {MyResponse} res - Express response object containing the database hash
+ * @param {NextFunction} next - Express next function to continue middleware chain
+ * 
+ * @returns {void} Calls next() to continue, or next(error) on failure
+ * 
+ * @throws {Object} Will call next() with error object containing:
+ *   - statusCode: 400 - When password is missing from request body
+ *   - statusCode: 400 - When hash is missing from response data
+ *   - statusCode: 401 - When password doesn't match the stored hash
+ *   - statusCode: 400 - InvalidPasswordError from Passken compare() function
+ *   - statusCode: 400 - InvalidBase64SecretError from Passken compare() function
+ * 
+ * @example
+ * ```typescript
+ * import { compare } from '@dwtechs/passken-express';
+ * 
+ * // Usage in Express route after database query
+ * app.post('/login', getUserFromDB, compare, (req, res) => {
+ *   res.json({ message: 'Login successful' });
+ * });
+ * 
+ * // Request body should contain:
+ * // { "password": "user-password" } or { "pwd": "user-password" }
+ * 
+ * // Response should contain hash from database:
+ * // res.rows[0].password or res.rows[0].pwd or res.password or res.pwd
+ * ```
+ */
 function compare(req: Request, res: MyResponse, next: NextFunction): void {}
-// Create a password
+
+/**
+ * Express middleware to generate random passwords and encrypt them for multiple users.
+ * 
+ * This middleware generates secure random passwords for multiple user records and encrypts
+ * them using Passken's encryption function. It processes an array of user objects in the
+ * request body, adding both plaintext and encrypted password fields to each record.
+ * The plaintext passwords can be sent to users (e.g., via email) while encrypted passwords
+ * are stored in the database.
+ * 
+ * @param {Request} req - Express request object containing user records in body.rows
+ * @param {Response} _res - Express response object (not used in this function)
+ * @param {NextFunction} next - Express next function to continue middleware chain
+ * 
+ * @returns {void} Calls next() to continue, or next(error) on failure
+ * 
+ * @throws {Object} Will call next() with error object containing:
+ *   - statusCode: 400 - When req.body.rows is missing or not an array
+ *   - statusCode: 400 - InvalidPasswordError from Passken encrypt() function
+ *   - statusCode: 400 - InvalidBase64SecretError from Passken encrypt() function
+ * 
+ * @example
+ * ```typescript
+ * import { create } from '@dwtechs/passken-express';
+ * 
+ * // Usage in Express route for bulk user creation
+ * app.post('/users/bulk', create, saveUsersToDatabase, (req, res) => {
+ *   // Send plaintext passwords to users via email
+ *   req.body.rows.forEach(user => {
+ *     sendPasswordEmail(user.email, user.pwd);
+ *   });
+ *   res.json({ message: 'Users created successfully' });
+ * });
+ * 
+ * // Request body should contain:
+ * // { "rows": [{ "name": "User1", "email": "user1@example.com" }, ...] }
+ * 
+ * // After processing, each row will have:
+ * // { "name": "User1", "email": "user1@example.com", "pwd": "generated-password", "encryptedPwd": "encrypted-hash" }
+ * ```
+ */
 function create(req: Request, res: Response, next: NextFunction): void {}
 
 ```
@@ -193,11 +303,93 @@ function create(req: Request, res: Response, next: NextFunction): void {}
 
 ```javascript
 
-// Refresh the JWT tokens for a user.
+/**
+ * Refreshes the JWT tokens for a user.
+ *
+ * This function generates new access and refresh tokens for a user based on the provided
+ * decoded access token or user ID in the request body. It validates the issuer (iss) and
+ * creates new tokens if the validation is successful. The new tokens are then added to the
+ * response object.
+ *
+ * @param {Request} req - The request object containing the decoded access token or user ID.
+ * @param {MyResponse} res - The response object where the new tokens will be added.
+ * @param {NextFunction} next - The next middleware function in the Express.js request-response cycle.
+ *
+ * @returns {Promise<void>} Calls the next middleware function with an error if the issuer is invalid,
+ *          otherwise proceeds to the next middleware function.
+ * 
+ * @throws {Object} Will call next() with error object containing:
+ *   - statusCode: 400 - When iss (issuer) is missing or invalid
+ *   - statusCode: 400 - When iss is not a valid number between 1 and 999999999
+ *   - statusCode: 400 - InvalidIssuerError from Passken sign() function
+ *   - statusCode: 500 - InvalidSecretsError from Passken sign() function
+ *   - statusCode: 400 - InvalidDurationError from Passken sign() function
+ *   - statusCode: 500 - SecretDecodingError from Passken sign() function
+ */
 function refresh(req: Request, res: MyResponse, next: NextFunction): void {}
-// Decode and verify a JWT access token from the request body.
+
+/**
+ * Express middleware function to decode and verify an access token from the Authorization header.
+ * 
+ * This middleware extracts the JWT access token from the Authorization header, validates its format,
+ * verifies its signature, and attaches the decoded token to the request body for use by subsequent
+ * middleware. It only processes requests that have `req.body.protected` set to true.
+ * 
+ * @param {Request} req - The Express request object containing the Authorization header and body
+ * @param {Response} _res - The Express response object (not used in this function)
+ * @param {NextFunction} next - The next middleware function to be called
+ * 
+ * @returns {void} Calls the next middleware function, either with an error or successfully
+ * 
+ * @throws {Object} Will call next() with error object containing:
+ *   - statusCode: 401 - MissingAuthorizationError when Authorization header is missing
+ *   - statusCode: 401 - InvalidBearerFormatError when Authorization header format is invalid
+ *   - statusCode: 401 - When token is not a valid JWT format
+ *   - statusCode: 401 - InvalidTokenError when token is malformed or has invalid structure
+ *   - statusCode: 401 - TokenExpiredError when token has expired (ignored in this function)
+ *   - statusCode: 401 - TokenNotActiveError when token cannot be used yet (nbf claim)
+ *   - statusCode: 401 - InvalidSignatureError when token signature is invalid
+ *   - statusCode: 500 - InvalidSecretsError when secrets configuration is invalid
+ *   - statusCode: 500 - SecretDecodingError when secret cannot be decoded
+ *   - statusCode: 400 - When decoded token is missing required 'iss' claim
+ * 
+ * @example
+ * ```typescript
+ * // Usage in Express route
+ * app.post('/protected-route', decodeAccess, (req, res) => {
+ *   // Access the decoded token
+ *   const userId = req.body.decodedAccessToken.iss;
+ *   res.json({ message: `Hello user ${userId}` });
+ * });
+ * 
+ * // Request headers should include:
+ * // Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ * // Request body should include:
+ * // { "protected": true }
+ * ```
+ * 
+ */
 function decodeAccess(req: Request, _res: Response, next: NextFunction): void {}
-// Decode and verify a refresh token from the request body
+
+/**
+ * Middleware function to decode and verify a refresh token from the request body.
+ * 
+ * @param {Request} req - The request object containing the refresh token in the body.
+ * @param {Response} _res - The response object (not used in this function).
+ * @param {NextFunction} next - The next middleware function to be called.
+ * 
+ * @returns {Promise<void>} Calls the next middleware function with an error object if the token is invalid or missing required fields.
+ * 
+ * @throws {Object} Will call next() with error object containing:
+ *   - statusCode: 401 - When refresh token is not a valid JWT format
+ *   - statusCode: 401 - InvalidTokenError when token is malformed or has invalid structure
+ *   - statusCode: 401 - TokenExpiredError when refresh token has expired
+ *   - statusCode: 401 - TokenNotActiveError when token cannot be used yet (nbf claim)
+ *   - statusCode: 401 - InvalidSignatureError when token signature is invalid
+ *   - statusCode: 500 - InvalidSecretsError when secrets configuration is invalid
+ *   - statusCode: 500 - SecretDecodingError when secret cannot be decoded
+ *   - statusCode: 400 - When decoded token is missing required 'iss' claim
+ */
 function decodeRefresh(req: Request, _res: Response, next: NextFunction): void {}
 
 ```

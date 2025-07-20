@@ -28,12 +28,20 @@ const refreshDuration = isNumber(REFRESH_TOKEN_DURATION, false) ? REFRESH_TOKEN_
  * creates new tokens if the validation is successful. The new tokens are then added to the
  * response object.
  *
- * @param req - The request object containing the decoded access token or user ID.
- * @param res - The response object where the new tokens will be added.
- * @param next - The next middleware function in the Express.js request-response cycle.
+ * @param {Request} req - The request object containing the decoded access token or user ID.
+ * @param {MyResponse} res - The response object where the new tokens will be added.
+ * @param {NextFunction} next - The next middleware function in the Express.js request-response cycle.
  *
- * @returns Calls the next middleware function with an error if the issuer is invalid,
+ * @returns {Promise<void>} Calls the next middleware function with an error if the issuer is invalid,
  *          otherwise proceeds to the next middleware function.
+ * 
+ * @throws {Object} Will call next() with error object containing:
+ *   - statusCode: 400 - When iss (issuer) is missing or invalid
+ *   - statusCode: 400 - When iss is not a valid number between 1 and 999999999
+ *   - statusCode: 400 - InvalidIssuerError from Passken sign() function
+ *   - statusCode: 500 - InvalidSecretsError from Passken sign() function
+ *   - statusCode: 400 - InvalidDurationError from Passken sign() function
+ *   - statusCode: 500 - SecretDecodingError from Passken sign() function
  */
 async function refresh(req: Request, res: MyResponse, next: NextFunction) {
   const iss = req.body.decodedAccessToken?.iss || req.body?.id?.toString();
@@ -64,7 +72,17 @@ async function refresh(req: Request, res: MyResponse, next: NextFunction) {
  * 
  * @returns {void} Calls the next middleware function, either with an error or successfully
  * 
- * @throws {Object} Will call next() with appropriate status codes based on error types
+ * @throws {Object} Will call next() with error object containing:
+ *   - statusCode: 401 - MissingAuthorizationError when Authorization header is missing
+ *   - statusCode: 401 - InvalidBearerFormatError when Authorization header format is invalid
+ *   - statusCode: 401 - When token is not a valid JWT format
+ *   - statusCode: 401 - InvalidTokenError when token is malformed or has invalid structure
+ *   - statusCode: 401 - TokenExpiredError when token has expired (ignored in this function)
+ *   - statusCode: 401 - TokenNotActiveError when token cannot be used yet (nbf claim)
+ *   - statusCode: 401 - InvalidSignatureError when token signature is invalid
+ *   - statusCode: 500 - InvalidSecretsError when secrets configuration is invalid
+ *   - statusCode: 500 - SecretDecodingError when secret cannot be decoded
+ *   - statusCode: 400 - When decoded token is missing required 'iss' claim
  * 
  * @example
  * ```typescript
@@ -118,13 +136,21 @@ function decodeAccess(req: Request, _res: Response, next: NextFunction) {
 /**
  * Middleware function to decode and verify a refresh token from the request body.
  * 
- * @param req - The request object containing the refresh token in the body.
- * @param _res - The response object (not used in this function).
- * @param next - The next middleware function to be called.
+ * @param {Request} req - The request object containing the refresh token in the body.
+ * @param {Response} _res - The response object (not used in this function).
+ * @param {NextFunction} next - The next middleware function to be called.
  * 
- * @returns Calls the next middleware function with an error object if the token is invalid or missing required fields.
+ * @returns {Promise<void>} Calls the next middleware function with an error object if the token is invalid or missing required fields.
  * 
- * @throws Will call the next middleware with appropriate status codes based on error types.
+ * @throws {Object} Will call next() with error object containing:
+ *   - statusCode: 401 - When refresh token is not a valid JWT format
+ *   - statusCode: 401 - InvalidTokenError when token is malformed or has invalid structure
+ *   - statusCode: 401 - TokenExpiredError when refresh token has expired
+ *   - statusCode: 401 - TokenNotActiveError when token cannot be used yet (nbf claim)
+ *   - statusCode: 401 - InvalidSignatureError when token signature is invalid
+ *   - statusCode: 500 - InvalidSecretsError when secrets configuration is invalid
+ *   - statusCode: 500 - SecretDecodingError when secret cannot be decoded
+ *   - statusCode: 400 - When decoded token is missing required 'iss' claim
  */
 async function decodeRefresh(req: Request, _res: Response, next: NextFunction) {
   const token = req.body.refreshToken;
