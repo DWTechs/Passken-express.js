@@ -83,21 +83,28 @@ const addMany = [
 
 // Login user
 const login = [
-  token.validate,
+  user.validate,
   user.getPwd,
   pk.compare,
   user.isActive,
 ];
 
+// Helper to mark routes as protected
+const protect = (req, res, next) => {
+  req.isProtected = true;
+  next();
+};
+
 const addConsumer = [
   consumer.validate,
+  protect,
+  pk.decodeAccess,
   pk.refresh,
   consumer.addOne
 ];
 
 const refresh = [
   consumer.validate,
-  pk.decodeAccess,
   pk.decodeRefresh,
   consumer.match,
   pk.refresh,
@@ -332,10 +339,10 @@ function refresh(req: Request, res: MyResponse, next: NextFunction): void {}
  * Express middleware function to decode and verify an access token from the Authorization header.
  * 
  * This middleware extracts the JWT access token from the Authorization header, validates its format,
- * verifies its signature, and attaches the decoded token to the request body for use by subsequent
- * middleware. It only processes requests that have `req.body.protected` set to true.
+ * verifies its signature, and attaches the decoded token to the request object for use by subsequent
+ * middleware. It only processes requests that have `req.isProtected` set to true.
  * 
- * @param {Request} req - The Express request object containing the Authorization header and body
+ * @param {Request} req - The Express request object containing the Authorization header
  * @param {Response} _res - The Express response object (not used in this function)
  * @param {NextFunction} next - The next middleware function to be called
  * 
@@ -355,17 +362,21 @@ function refresh(req: Request, res: MyResponse, next: NextFunction): void {}
  * 
  * @example
  * ```typescript
- * // Usage in Express route
- * app.post('/protected-route', decodeAccess, (req, res) => {
- *   // Access the decoded token
- *   const userId = req.body.decodedAccessToken.iss;
+ * // Usage in Express route with protection middleware
+ * const protect = (req: Request, res: Response, next: NextFunction) => {
+ *   req.isProtected = true;
+ *   next();
+ * };
+ * 
+ * app.post('/protected-route', protect, decodeAccess, (req, res) => {
+ *   // Access the decoded token and user info
+ *   const userId = req.user?.id;
+ *   const decodedToken = req.decodedAccessToken;
  *   res.json({ message: `Hello user ${userId}` });
  * });
  * 
  * // Request headers should include:
  * // Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
- * // Request body should include:
- * // { "protected": true }
  * ```
  * 
  */

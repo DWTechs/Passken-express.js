@@ -44,7 +44,7 @@ const refreshDuration = isNumber(REFRESH_TOKEN_DURATION, false) ? REFRESH_TOKEN_
  *   - statusCode: 500 - SecretDecodingError from Passken sign() function
  */
 async function refresh(req: Request, res: MyResponse, next: NextFunction) {
-  const iss = req.body.decodedAccessToken?.iss || req.body?.id?.toString();
+  const iss = req.decodedAccessToken?.iss || req.body?.id?.toString();
 
   if (!isValidNumber(iss, 1, 999999999, false))
     return next({ statusCode: 400, message: "Passken: Missing iss" });
@@ -63,10 +63,10 @@ async function refresh(req: Request, res: MyResponse, next: NextFunction) {
  * Express middleware function to decode and verify an access token from the Authorization header.
  * 
  * This middleware extracts the JWT access token from the Authorization header, validates its format,
- * verifies its signature, and attaches the decoded token to the request body for use by subsequent
- * middleware. It only processes requests that have `req.body.protected` set to true.
+ * verifies its signature, and attaches the decoded token to the request object for use by subsequent
+ * middleware. It only processes requests that have `req.isProtected` set to true.
  * 
- * @param {Request} req - The Express request object containing the Authorization header and body
+ * @param {Request} req - The Express request object containing the Authorization header
  * @param {Response} _res - The Express response object (not used in this function)
  * @param {NextFunction} next - The next middleware function to be called
  * 
@@ -86,22 +86,26 @@ async function refresh(req: Request, res: MyResponse, next: NextFunction) {
  * 
  * @example
  * ```typescript
- * // Usage in Express route
- * app.post('/protected-route', decodeAccess, (req, res) => {
- *   // Access the decoded token
- *   const userId = req.body.decodedAccessToken.iss;
+ * // Usage in Express route with protection middleware
+ * const protect = (req: Request, res: Response, next: NextFunction) => {
+ *   req.isProtected = true;
+ *   next();
+ * };
+ * 
+ * app.post('/protected-route', protect, decodeAccess, (req, res) => {
+ *   // Access the decoded token and user info
+ *   const userId = req.user?.id;
+ *   const decodedToken = req.decodedAccessToken;
  *   res.json({ message: `Hello user ${userId}` });
  * });
  * 
  * // Request headers should include:
  * // Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
- * // Request body should include:
- * // { "protected": true }
  * ```
  * 
  */
 function decodeAccess(req: Request, _res: Response, next: NextFunction) {
-  if (!req.body.protected) return next(); // if no jwt protection for this route
+  if (!req.isProtected) return next(); // if no jwt protection for this route
   
   log.debug(`decode access token`);
 
@@ -128,7 +132,8 @@ function decodeAccess(req: Request, _res: Response, next: NextFunction) {
     return next({ statusCode: 400, message: "Passken: Missing iss" });
 
   log.debug(`Decoded access token : ${JSON.stringify(decodedToken)}`);
-  req.body.decodedAccessToken = decodedToken;
+  req.decodedAccessToken = decodedToken;
+  req.user = { id: Number(decodedToken.iss), ...decodedToken };
   next();
 }
 
@@ -169,8 +174,8 @@ async function decodeRefresh(req: Request, _res: Response, next: NextFunction) {
   if (!isValidNumber(decodedToken.iss, 1, 999999999, false))
     return next({ statusCode: 400, message: "Passken: Missing iss" });
 
-  log.debug(`Decoded refresh token : ${JSON.stringify(req.body.decodedToken)}`);
-  req.body.decodedRefreshToken = decodedToken;
+  log.debug(`Decoded refresh token : ${JSON.stringify(req.decodedRefreshToken)}`);
+  req.decodedRefreshToken = decodedToken;
   next();
 }
 
