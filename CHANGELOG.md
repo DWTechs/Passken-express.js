@@ -2,7 +2,6 @@
 
 - **BREAKING CHANGE**: Middleware now uses `req.isProtected` instead of `req.body.protected` for route protection
 - **BREAKING CHANGE**: Decoded tokens are now attached to `req.decodedAccessToken` and `req.decodedRefreshToken` instead of `req.body`
-- Added `req.user` property containing user information from decoded token
 - Extended Express Request interface with TypeScript declarations for better type safety
 - Improved security by moving authentication properties from request body to request object
 
