@@ -89,15 +89,8 @@ const login = [
   user.isActive,
 ];
 
-// Helper to mark routes as protected
-const protect = (req, res, next) => {
-  req.isProtected = true;
-  next();
-};
-
 const addConsumer = [
   consumer.validate,
-  protect,
   pk.decodeAccess,
   pk.refresh,
   consumer.addOne
@@ -205,6 +198,12 @@ type Options = {
  * 
  * @returns {void}
  * 
+ * **Input Properties:**
+ * - `options` (Options object) - Password generation configuration
+ * 
+ * **Output Properties:**
+ * - None (sets global configuration)
+ * 
  * @example
  * ```typescript
  * import { init } from '@dwtechs/passken-express';
@@ -236,6 +235,13 @@ function init(options: Options): void {}
  * @param {NextFunction} next - Express next function to continue middleware chain
  * 
  * @returns {void} Calls next() to continue, or next(error) on failure
+ * 
+ * **Input Properties Required:**
+ * - `req.body.password` OR `req.body.pwd` (string) - User's plaintext password
+ * - `res.rows[0].password` OR `res.rows[0].pwd` OR `res.password` OR `res.pwd` (string) - Hashed password from database
+ * 
+ * **Output Properties:**
+ * - None (validation only - continues middleware chain on success)
  * 
  * @throws {Object} Will call next() with error object containing:
  *   - statusCode: 400 - When password is missing from request body
@@ -276,6 +282,13 @@ function compare(req: Request, res: MyResponse, next: NextFunction): void {}
  * @param {NextFunction} next - Express next function to continue middleware chain
  * 
  * @returns {void} Calls next() to continue, or next(error) on failure
+ * 
+ * **Input Properties Required:**
+ * - `req.body.rows` (array) - Array of user objects to generate passwords for
+ * 
+ * **Output Properties:**
+ * - `req.body.rows[i].pwd` (string) - Generated plaintext password for each user
+ * - `req.body.rows[i].encryptedPwd` (string) - Encrypted password hash for database storage
  * 
  * @throws {Object} Will call next() with error object containing:
  *   - statusCode: 400 - When req.body.rows is missing or not an array
@@ -325,6 +338,13 @@ function create(req: Request, res: Response, next: NextFunction): void {}
  * @returns {Promise<void>} Calls the next middleware function with an error if the issuer is invalid,
  *          otherwise proceeds to the next middleware function.
  * 
+ * **Input Properties Required:**
+ * - `req.decodedAccessToken.iss` OR `req.body.id` (number/string) - User ID/issuer for token generation
+ * 
+ * **Output Properties:**
+ * - `res.rows[0].accessToken` (string) - New JWT access token
+ * - `res.rows[0].refreshToken` (string) - New JWT refresh token
+ * 
  * @throws {Object} Will call next() with error object containing:
  *   - statusCode: 400 - When iss (issuer) is missing or invalid
  *   - statusCode: 400 - When iss is not a valid number between 1 and 999999999
@@ -347,6 +367,13 @@ function refresh(req: Request, res: MyResponse, next: NextFunction): void {}
  * @param {NextFunction} next - The next middleware function to be called
  * 
  * @returns {void} Calls the next middleware function, either with an error or successfully
+ * 
+ * **Input Properties Required:**
+ * - `req.isProtected` (boolean) - Must be true to process the request
+ * - `req.headers.authorization` (string) - Bearer token in format "Bearer <token>"
+ * 
+ * **Output Properties:**
+ * - `req.decodedAccessToken` (object) - Decoded JWT payload
  * 
  * @throws {Object} Will call next() with error object containing:
  *   - statusCode: 401 - MissingAuthorizationError when Authorization header is missing
@@ -379,6 +406,12 @@ function decodeAccess(req: Request, _res: Response, next: NextFunction): void {}
  * @param {NextFunction} next - The next middleware function to be called.
  * 
  * @returns {Promise<void>} Calls the next middleware function with an error object if the token is invalid or missing required fields.
+ * 
+ * **Input Properties Required:**
+ * - `req.body.refreshToken` (string) - JWT refresh token to decode and verify
+ * 
+ * **Output Properties:**
+ * - `req.decodedRefreshToken` (object) - Decoded JWT refresh token payload
  * 
  * @throws {Object} Will call next() with error object containing:
  *   - statusCode: 401 - When refresh token is not a valid JWT format
