@@ -50,7 +50,7 @@ function compare(req, res, next) {
             dbHash = row.pwd;
     }
     else
-        dbHash = (res === null || res === void 0 ? void 0 : res.password) || (res === null || res === void 0 ? void 0 : res.pwd);
+        dbHash = res.password || res.pwd;
     if (!dbHash)
         return next({ statusCode: 400, message: "Passken: Missing hash from the database. Should be in res.rows[0].password or res.rows[0].pwd or res.password or res.pwd" });
     log.debug(`Passken: Compare pwd=${!!pwd} & dbHash=${!!dbHash}`);
@@ -91,7 +91,7 @@ const refreshDuration = isNumber(REFRESH_TOKEN_DURATION, false) ? REFRESH_TOKEN_
 function refresh(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         var _a, _b, _c;
-        const iss = ((_a = req.body.decodedAccessToken) === null || _a === void 0 ? void 0 : _a.iss) || ((_c = (_b = req.body) === null || _b === void 0 ? void 0 : _b.id) === null || _c === void 0 ? void 0 : _c.toString());
+        const iss = ((_a = req.decodedAccessToken) === null || _a === void 0 ? void 0 : _a.iss) || ((_c = (_b = req.body) === null || _b === void 0 ? void 0 : _b.id) === null || _c === void 0 ? void 0 : _c.toString());
         if (!isValidNumber(iss, 1, 999999999, false))
             return next({ statusCode: 400, message: "Passken: Missing iss" });
         log.debug(`Create tokens for user ${iss}`);
@@ -103,7 +103,7 @@ function refresh(req, res, next) {
     });
 }
 function decodeAccess(req, _res, next) {
-    if (!req.body.protected)
+    if (!req.isProtected)
         return next();
     log.debug(`decode access token`);
     let t;
@@ -126,7 +126,7 @@ function decodeAccess(req, _res, next) {
     if (!isValidNumber(decodedToken.iss, 1, 999999999, false))
         return next({ statusCode: 400, message: "Passken: Missing iss" });
     log.debug(`Decoded access token : ${JSON.stringify(decodedToken)}`);
-    req.body.decodedAccessToken = decodedToken;
+    req.decodedAccessToken = decodedToken;
     next();
 }
 function decodeRefresh(req, _res, next) {
@@ -144,8 +144,8 @@ function decodeRefresh(req, _res, next) {
         }
         if (!isValidNumber(decodedToken.iss, 1, 999999999, false))
             return next({ statusCode: 400, message: "Passken: Missing iss" });
-        log.debug(`Decoded refresh token : ${JSON.stringify(req.body.decodedToken)}`);
-        req.body.decodedRefreshToken = decodedToken;
+        log.debug(`Decoded refresh token : ${JSON.stringify(req.decodedRefreshToken)}`);
+        req.decodedRefreshToken = decodedToken;
         next();
     });
 }

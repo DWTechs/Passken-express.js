@@ -11,10 +11,6 @@ declare global {
   namespace Express {
     interface Request {
       isProtected?: boolean;
-      user?: {
-        id: number;
-        [key: string]: any;
-      };
       decodedAccessToken?: any;
       decodedRefreshToken?: any;
     }

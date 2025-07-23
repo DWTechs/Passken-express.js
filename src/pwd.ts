@@ -101,7 +101,7 @@ function compare(req: Request, res: MyResponse, next: NextFunction) {
     else if (isProperty(row, "pwd", true, true) && isString(row.pwd, "!0"))
       dbHash = row.pwd;
   } else 
-    dbHash = res?.password || res?.pwd;
+    dbHash = res.password || res.pwd;
   if (!dbHash) 
     return next({ statusCode: 400, message: "Passken: Missing hash from the database. Should be in res.rows[0].password or res.rows[0].pwd or res.password or res.pwd" });
   

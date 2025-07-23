@@ -368,17 +368,6 @@ function refresh(req: Request, res: MyResponse, next: NextFunction): void {}
  *   next();
  * };
  * 
- * app.post('/protected-route', protect, decodeAccess, (req, res) => {
- *   // Access the decoded token and user info
- *   const userId = req.user?.id;
- *   const decodedToken = req.decodedAccessToken;
- *   res.json({ message: `Hello user ${userId}` });
- * });
- * 
- * // Request headers should include:
- * // Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
- * ```
- * 
  */
 function decodeAccess(req: Request, _res: Response, next: NextFunction): void {}
 
