@@ -6,7 +6,7 @@
     "passwords",
     "Express"
   ],
-  "homepage": "https://github.com/DWTechs/passken-express.js",
+  "homepage": "https://github.com/DWTechs/Passken-express.js",
   "main": "dist/passken-express",
   "types": "dist/passken-express",
   "repository": {
@@ -37,7 +37,7 @@
     "dist/"
   ],
   "dependencies": {
-    "@dwtechs/checkard": "3.2.2",
+    "@dwtechs/checkard": "3.2.3",
     "@dwtechs/passken": "0.4.0",
     "@dwtechs/winstan": "0.3.0"
   },
