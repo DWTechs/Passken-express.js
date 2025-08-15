@@ -25,7 +25,8 @@ https://github.com/DWTechs/Passken-express.js
 */
 
 import { isArray, isProperty, isString } from '@dwtechs/checkard';
-import * as pk from '@dwtechs/passken';
+import { randomPwd } from '@dwtechs/passken';
+import { compare as compare$1, encrypt } from '@dwtechs/hashitaka';
 import { log } from '@dwtechs/winstan';
 
 const { PWD_SECRET } = process.env;
@@ -55,7 +56,7 @@ function compare(req, res, next) {
     if (!dbHash)
         return next({ statusCode: 400, message: `${PE_PREFIX}Missing hash from the database. Should be in res.rows[0].password or res.rows[0].pwd or res.password or res.pwd` });
     log.debug(`${PE_PREFIX}Compare pwd=${!!pwd} & dbHash=${!!dbHash}`);
-    if (!pk.compare(pwd, dbHash, PWD_SECRET))
+    if (!compare$1(pwd, dbHash, PWD_SECRET))
         return next({ statusCode: 401, message: `${PE_PREFIX}Wrong password` });
     log.debug(`${PE_PREFIX}Correct password`);
     next();
@@ -66,8 +67,8 @@ function create(req, _res, next) {
     if (!isArray((_a = req.body) === null || _a === void 0 ? void 0 : _a.rows, ">", 0))
         return next({ statusCode: 400, message: `${PE_PREFIX}Missing resources. Should be in req.body.rows` });
     for (const r of req.body.rows) {
-        r.pwd = pk.randomPwd(Opts);
-        r.encryptedPwd = pk.encrypt(r.pwd, PWD_SECRET);
+        r.pwd = randomPwd(Opts);
+        r.encryptedPwd = encrypt(r.pwd, PWD_SECRET);
     }
     next();
 }
