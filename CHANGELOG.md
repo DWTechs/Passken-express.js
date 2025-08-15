@@ -1,3 +1,8 @@
+
+# 0.4.0 (Aug 12th 2025)
+
+- Delete JWT management from the library. Now **Passken-express** is only about Passwords management. JWT features are in a new library called **@dwtechs/toker-express**
+
 # 0.3.0 (Jul 23rd 2025)
 
 - **BREAKING CHANGE**: Middleware now uses `req.isProtected` instead of `req.body.protected` for route protection
