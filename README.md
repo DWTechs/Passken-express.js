@@ -8,7 +8,6 @@
 - [Support](#support)
 - [Installation](#installation)
 - [Usage](#usage)
-  - [ES6](#es6)
   - [Configure](#configure)
   - [Environment variables](#environment-variables)
 - [API Reference](#api-reference)
@@ -45,8 +44,6 @@ $ npm i @dwtechs/passken-express
 
 ## Usage
 
-
-### ES6 / TypeScript
 
 ```javascript
 
