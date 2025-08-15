@@ -84,20 +84,6 @@ const login = [
   user.isActive,
 ];
 
-const addConsumer = [
-  consumer.validate,
-  pk.decodeAccess,
-  pk.refresh,
-  consumer.addOne
-];
-
-const refresh = [
-  consumer.validate,
-  pk.decodeRefresh,
-  consumer.match,
-  pk.refresh,
-  consumer.updateOne,
-];
 
 // Routes
 
