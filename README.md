@@ -34,7 +34,6 @@ It includes @dwtechs/passken and adds Express middlewares to be used in a node.j
 - node: 22
 
 This is the oldest targeted versions.  
-The library uses node:crypto.   
 
 
 ## Installation
@@ -232,19 +231,12 @@ function init(options: Options): void {}
  * 
  * @returns {void} Calls next() to continue, or next(error) on failure
  * 
- * **Input Properties Required:**
- * - `req.body.password` OR `req.body.pwd` (string) - User's plaintext password
- * - `res.rows[0].password` OR `res.rows[0].pwd` OR `res.password` OR `res.pwd` (string) - Hashed password from database
- * 
- * **Output Properties:**
- * - None (validation only - continues middleware chain on success)
- * 
+ * @throws {InvalidPasswordError} If the password is invalid or does not match the hash (HTTP 400)
+ * @throws {InvalidBase64SecretError} If the secret is not a valid base64 string (HTTP 400)
  * @throws {Object} Will call next() with error object containing:
  *   - statusCode: 400 - When password is missing from request body
  *   - statusCode: 400 - When hash is missing from response data
  *   - statusCode: 401 - When password doesn't match the stored hash
- *   - statusCode: 400 - InvalidPasswordError from Passken compare() function
- *   - statusCode: 400 - InvalidBase64SecretError from Passken compare() function
  * 
  * @example
  * ```typescript
@@ -279,17 +271,10 @@ function compare(req: Request, res: MyResponse, next: NextFunction): void {}
  * 
  * @returns {void} Calls next() to continue, or next(error) on failure
  * 
- * **Input Properties Required:**
- * - `req.body.rows` (array) - Array of user objects to generate passwords for
- * 
- * **Output Properties:**
- * - `req.body.rows[i].pwd` (string) - Generated plaintext password for each user
- * - `req.body.rows[i].encryptedPwd` (string) - Encrypted password hash for database storage
- * 
+ * @throws {InvalidPasswordError} If password generation or encryption fails (HTTP 400)
+ * @throws {InvalidBase64SecretError} If the secret is not a valid base64 string (HTTP 400)
  * @throws {Object} Will call next() with error object containing:
  *   - statusCode: 400 - When req.body.rows is missing or not an array
- *   - statusCode: 400 - InvalidPasswordError from Passken encrypt() function
- *   - statusCode: 400 - InvalidBase64SecretError from Passken encrypt() function
  * 
  * @example
  * ```typescript
@@ -328,9 +313,6 @@ It will then look for the hashed password stored in the database :
 ```Javascript
 const hash = res.rows[0].password || res.rows[0].pwd || res.password || res.pwd;
 ```
-
-It will throw an error if the password or the hash are missing.
-It will throw an error if the password does not match the hash.
 
 ### Password generation
 

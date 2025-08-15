@@ -7,8 +7,13 @@ import type { MyResponse } from "./interfaces";
 
 const { PWD_SECRET } = process.env;
 
+/**
+ * Prefix for all error messages
+ */
+const PE_PREFIX = "Passken-express: ";
+
 if (!PWD_SECRET)
-  throw new Error("Passken: Missing PWD_SECRET environment variable");
+  throw new Error(`${PE_PREFIX}Missing PWD_SECRET environment variable`);
 
 let Opts: Options | undefined = undefined;
 
@@ -64,12 +69,12 @@ function init(options: Options): void {
  * 
  * @returns {void} Calls next() to continue, or next(error) on failure
  * 
+ * @throws {InvalidPasswordError} If the password is invalid or does not match the hash (HTTP 400)
+ * @throws {InvalidBase64SecretError} If the secret is not a valid base64 string (HTTP 400)
  * @throws {Object} Will call next() with error object containing:
  *   - statusCode: 400 - When password is missing from request body
  *   - statusCode: 400 - When hash is missing from response data
  *   - statusCode: 401 - When password doesn't match the stored hash
- *   - statusCode: 400 - InvalidPasswordError from Passken compare() function
- *   - statusCode: 400 - InvalidBase64SecretError from Passken compare() function
  * 
  * @example
  * ```typescript
@@ -89,9 +94,11 @@ function init(options: Options): void {
  */
 function compare(req: Request, res: MyResponse, next: NextFunction) {
   
+  log.debug(`${PE_PREFIX}compare password hashes`);
+
   const pwd = req.body?.password || req.body?.pwd; // from request
   if (!pwd) 
-    return next({ statusCode: 400, message: "Passken: Missing password in the request. Should be in req.body.password or req.body.pwd" });
+    return next({ statusCode: 400, message: `${PE_PREFIX}Missing password in the request. Should be in req.body.password or req.body.pwd` });
   
   let dbHash: string | undefined = undefined;
   if (isArray(res.rows, ">", 0)) {
@@ -103,13 +110,13 @@ function compare(req: Request, res: MyResponse, next: NextFunction) {
   } else 
     dbHash = res.password || res.pwd;
   if (!dbHash) 
-    return next({ statusCode: 400, message: "Passken: Missing hash from the database. Should be in res.rows[0].password or res.rows[0].pwd or res.password or res.pwd" });
+    return next({ statusCode: 400, message: `${PE_PREFIX}Missing hash from the database. Should be in res.rows[0].password or res.rows[0].pwd or res.password or res.pwd` });
   
-  log.debug(`Passken: Compare pwd=${!!pwd} & dbHash=${!!dbHash}`);
+  log.debug(`${PE_PREFIX}Compare pwd=${!!pwd} & dbHash=${!!dbHash}`);
   if (!pk.compare(pwd, dbHash, PWD_SECRET as string))
-    return next({ statusCode: 401, message: "Passken: Wrong password" });
+    return next({ statusCode: 401, message: `${PE_PREFIX}Wrong password` });
 
-  log.debug("Passken: Correct password");
+  log.debug(`${PE_PREFIX}Correct password`);
   next();
   
 }
@@ -129,10 +136,10 @@ function compare(req: Request, res: MyResponse, next: NextFunction) {
  * 
  * @returns {void} Calls next() to continue, or next(error) on failure
  * 
+ * @throws {InvalidPasswordError} If password generation or encryption fails (HTTP 400)
+ * @throws {InvalidBase64SecretError} If the secret is not a valid base64 string (HTTP 400)
  * @throws {Object} Will call next() with error object containing:
  *   - statusCode: 400 - When req.body.rows is missing or not an array
- *   - statusCode: 400 - InvalidPasswordError from Passken encrypt() function
- *   - statusCode: 400 - InvalidBase64SecretError from Passken encrypt() function
  * 
  * @example
  * ```typescript
@@ -155,11 +162,11 @@ function compare(req: Request, res: MyResponse, next: NextFunction) {
  * ```
  */
 function create(req: Request, _res: Response, next: NextFunction) {
-  
-  log.debug("Passken: Create password");
-  
+
+  log.debug(`${PE_PREFIX}Create password`);
+
   if (!isArray(req.body?.rows, ">", 0))
-    return next({ statusCode: 400, message: "Passken: Missing resources. Should be in req.body.rows" });
+    return next({ statusCode: 400, message: `${PE_PREFIX}Missing resources. Should be in req.body.rows` });
 
   for (const r of req.body.rows) {
     r.pwd = pk.randomPwd(Opts);
