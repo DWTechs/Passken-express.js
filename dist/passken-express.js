@@ -68,7 +68,6 @@ function compare(req, res, next) {
         dbHash = res.password || res.pwd || res.pwdHash;
     if (!dbHash)
         return next({ statusCode: 400, message: `${PE_PREFIX}Missing hash from the database. Should be in res.password or res.pwd or res.pwdHash or res.rows[0].password or res.rows[0].pwd or res.rows[0].pwdHash or res.locals.rows[0].password or res.locals.rows[0].pwd or res.locals.rows[0].pwdHash` });
-    log.debug(`${PE_PREFIX}Compare pwd=${!!pwd} & dbHash=${!!dbHash}`);
     if (!compare$1(pwd, dbHash, PWD_SECRET))
         return next({ statusCode: 401, message: `${PE_PREFIX}Wrong password` });
     log.debug(`${PE_PREFIX}Correct password`);

@@ -1,4 +1,8 @@
 
+# 0.4.4 (Aug 17th 2025)
+
+- Update @dwtechs/hashitaka to version 0.2.2
+
 # 0.4.3 (Aug 17th 2025)
 
 - Add support for `pwd`, `password` and `pwdHash` properties in `res.locals` property in password comparison function
