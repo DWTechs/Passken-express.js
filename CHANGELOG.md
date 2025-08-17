@@ -1,4 +1,8 @@
 
+# 0.4.2 (Aug 17th 2025)
+
+- Improve Typescript support for compare function
+
 # 0.4.1 (Aug 16th 2025)
 
 - Added support for `pwdHash` property in password comparison function
