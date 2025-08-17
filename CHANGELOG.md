@@ -1,11 +1,15 @@
 
+# 0.4.3 (Aug 17th 2025)
+
+- Add support for `pwd`, `password` and `pwdHash` properties in `res.locals` property in password comparison function
+
 # 0.4.2 (Aug 17th 2025)
 
 - Improve Typescript support for compare function
 
 # 0.4.1 (Aug 16th 2025)
 
-- Added support for `pwdHash` property in password comparison function
+- Add support for `pwdHash` property in password comparison function
 
 # 0.4.0 (Aug 12th 2025)
 
