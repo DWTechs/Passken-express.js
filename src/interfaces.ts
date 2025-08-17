@@ -4,6 +4,7 @@ export interface MyResponse extends Response {
   rows?: object[];
   password?: string;
   pwd?: string;
+  pwdHash?: string;
 }
 
 // Extend Express Request interface

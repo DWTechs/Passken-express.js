@@ -97,7 +97,7 @@ function compare(req: Request, res: MyResponse, next: NextFunction) {
   
   log.debug(`${PE_PREFIX}compare password hashes`);
 
-  const pwd = req.body?.password || req.body?.pwd; // from request
+  const pwd = req.body?.password || req.body?.pwd || req.body?.pwdHash; // from request
   if (!pwd) 
     return next({ statusCode: 400, message: `${PE_PREFIX}Missing password in the request. Should be in req.body.password or req.body.pwd` });
   
@@ -108,10 +108,12 @@ function compare(req: Request, res: MyResponse, next: NextFunction) {
       dbHash = row.password;
     else if (isProperty(row, "pwd", true, true) && isString(row.pwd, "!0"))
       dbHash = row.pwd;
+    else if (isProperty(row, "pwdHash", true, true) && isString(row.pwdHash, "!0"))
+      dbHash = row.pwdHash;
   } else 
-    dbHash = res.password || res.pwd;
+    dbHash = res.password || res.pwd || res.pwdHash;
   if (!dbHash) 
-    return next({ statusCode: 400, message: `${PE_PREFIX}Missing hash from the database. Should be in res.rows[0].password or res.rows[0].pwd or res.password or res.pwd` });
+    return next({ statusCode: 400, message: `${PE_PREFIX}Missing hash from the database. Should be in res.rows[0].password or res.rows[0].pwd or res.rows[0].pwdHash or res.password or res.pwd or res.pwdHash` });
   
   log.debug(`${PE_PREFIX}Compare pwd=${!!pwd} & dbHash=${!!dbHash}`);
   if (!comparePWD(pwd, dbHash, PWD_SECRET as string))

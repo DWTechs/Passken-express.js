@@ -1,4 +1,8 @@
 
+# 0.4.1 (Aug 16th 2025)
+
+- Added support for `pwdHash` property in password comparison function
+
 # 0.4.0 (Aug 12th 2025)
 
 - Delete JWT management from the library. Now **Passken-express** is only about Passwords management. JWT features are in a new library called **@dwtechs/toker-express**

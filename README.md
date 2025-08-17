@@ -2,7 +2,7 @@
 [![License: MIT](https://img.shields.io/npm/l/@dwtechs/passken-express.svg?color=brightgreen)](https://opensource.org/licenses/MIT)
 [![npm version](https://badge.fury.io/js/%40dwtechs%2Fpassken-express.svg)](https://www.npmjs.com/package/@dwtechs/passken-express)
 [![last version release date](https://img.shields.io/github/release-date/DWTechs/Passken-express.js)](https://www.npmjs.com/package/@dwtechs/passken-express)
-[![minified size](https://img.shields.io/bundlephobia/min/@dwtechs/passken-express?color=brightgreen)](https://www.npmjs.com/package/@dwtechs/passken-express)
+
 
 - [Synopsis](#synopsis)
 - [Support](#support)
@@ -288,13 +288,13 @@ function create(req: Request, res: Response, next: NextFunction): void {}
 The function will look for a password value from the client request body :  
 
 ```Javascript
-const pwd = req.body?.password || req.body?.pwd.
+const pwd = req.body?.password || req.body?.pwd || req.body?.pwdHash.
 ```
 
 It will then look for the hashed password stored in the database :
 
 ```Javascript
-const hash = res.rows[0].password || res.rows[0].pwd || res.password || res.pwd;
+const hash = res.rows[0].password || res.rows[0].pwd || res.rows[0].pwdHash || res.password || res.pwd || res.pwdHash;
 ```
 
 ### Password generation
