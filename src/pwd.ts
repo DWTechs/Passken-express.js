@@ -102,18 +102,31 @@ function compare(req: Request, res: MyResponse, next: NextFunction) {
     return next({ statusCode: 400, message: `${PE_PREFIX}Missing password in the request. Should be in req.body.password or req.body.pwd` });
   
   let dbHash: string | undefined = undefined;
+  
   if (isArray(res.rows, ">", 0)) {
-    const row = res.rows[0];
-    if (isProperty(row, "password", true, true) && isString(row.password, "!0"))
-      dbHash = row.password;
-    else if (isProperty(row, "pwd", true, true) && isString(row.pwd, "!0"))
-      dbHash = row.pwd;
-    else if (isProperty(row, "pwdHash", true, true) && isString(row.pwdHash, "!0"))
-      dbHash = row.pwdHash;
+    const r = res.rows[0];
+    if (isProperty(r, "password", true, true) && isString(r.password, "!0"))
+      dbHash = r.password;
+    else if (isProperty(r, "pwd", true, true) && isString(r.pwd, "!0"))
+      dbHash = r.pwd;
+    else if (isProperty(r, "pwdHash", true, true) && isString(r.pwdHash, "!0"))
+      dbHash = r.pwdHash;
   } else 
     dbHash = res.password || res.pwd || res.pwdHash;
+
+  if (isArray(res.locals?.rows, ">", 0)) {
+    const r = res.locals.rows[0] as Object;
+    if (isProperty(r, "password", true, true) && isString(r.password, "!0"))
+      dbHash = r.password;
+    else if (isProperty(r, "pwd", true, true) && isString(r.pwd, "!0"))
+      dbHash = r.pwd;
+    else if (isProperty(r, "pwdHash", true, true) && isString(r.pwdHash, "!0"))
+      dbHash = r.pwdHash;
+  } else 
+    dbHash = res.password || res.pwd || res.pwdHash;
+
   if (!dbHash) 
-    return next({ statusCode: 400, message: `${PE_PREFIX}Missing hash from the database. Should be in res.rows[0].password or res.rows[0].pwd or res.rows[0].pwdHash or res.password or res.pwd or res.pwdHash` });
+    return next({ statusCode: 400, message: `${PE_PREFIX}Missing hash from the database. Should be in res.password or res.pwd or res.pwdHash or res.rows[0].password or res.rows[0].pwd or res.rows[0].pwdHash or res.locals.rows[0].password or res.locals.rows[0].pwd or res.locals.rows[0].pwdHash` });
   
   log.debug(`${PE_PREFIX}Compare pwd=${!!pwd} & dbHash=${!!dbHash}`);
   if (!comparePWD(pwd, dbHash, PWD_SECRET as string))

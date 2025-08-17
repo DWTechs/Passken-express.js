@@ -294,7 +294,15 @@ const pwd = req.body?.password || req.body?.pwd || req.body?.pwdHash.
 It will then look for the hashed password stored in the database :
 
 ```Javascript
-const hash = res.rows[0].password || res.rows[0].pwd || res.rows[0].pwdHash || res.password || res.pwd || res.pwdHash;
+const hash = res.password 
+  || res.pwd 
+  || res.pwdHash
+  || res.rows[0].password 
+  || res.rows[0].pwd 
+  || res.rows[0].pwdHash
+  || res.locals.rows[0].password 
+  || res.locals.rows[0].pwd 
+  || res.locals.rows[0].pwdHash;
 ```
 
 ### Password generation
