@@ -1,3 +1,7 @@
+# 0.4.5 (Aug 18th 2025)
+
+- Base64 secrets sent to encrypt() and compare() functions does not need to be url-safe anymore
+- Update @dwtechs/hashitaka to version 0.2.3
 
 # 0.4.4 (Aug 17th 2025)
 
