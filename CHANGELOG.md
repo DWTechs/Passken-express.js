@@ -1,3 +1,10 @@
+# 0.4.6 (Sep 11th 2025)
+
+- Update dependencies
+  - "@dwtechs/checkard": "3.5.1"
+  - "@dwtechs/passken": "0.5.1"
+  - "@dwtechs/hashitaka": "0.3.1"
+
 # 0.4.5 (Aug 18th 2025)
 
 - Base64 secrets sent to encrypt() and compare() functions does not need to be url-safe anymore
