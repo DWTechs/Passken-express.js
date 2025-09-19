@@ -187,7 +187,7 @@ describe("create middleware", () => {
       const user = req.body.rows[0];
       
       // The encrypted password should be verifiable with the plaintext password
-      const isValid = comparePwd(user.pwd, user.encryptedPwd, secret);
+      const isValid = comparePwd(user.pwd, user.encryptedPwd, secret, true);
       expect(isValid).toBe(true);
     });
 
@@ -360,7 +360,7 @@ describe("create middleware", () => {
       expect(next).toHaveBeenCalledWith();
       
       req.body.rows.forEach(user => {
-        const isValid = comparePwd(user.pwd, user.encryptedPwd, secret);
+        const isValid = comparePwd(user.pwd, user.encryptedPwd, secret, true);
         expect(isValid).toBe(true);
       });
     });
@@ -373,7 +373,7 @@ describe("create middleware", () => {
       expect(next).toHaveBeenCalledWith();
       
       const user = req.body.rows[0];
-      const isValid = comparePwd("wrong-password", user.encryptedPwd, secret);
+      const isValid = comparePwd("wrong-password", user.encryptedPwd, secret, true);
       expect(isValid).toBe(false);
     });
 
@@ -528,7 +528,7 @@ describe("create middleware", () => {
         expect(user).toHaveProperty("encryptedPwd");
         
         // Verify password can be validated
-        const isValid = comparePwd(user.pwd, user.encryptedPwd, secret);
+        const isValid = comparePwd(user.pwd, user.encryptedPwd, secret, true);
         expect(isValid).toBe(true);
       });
     });

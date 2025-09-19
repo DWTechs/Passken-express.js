@@ -53,9 +53,9 @@ function compare(req, res, next) {
         else if (isProperty(r, "pwdHash", true, true) && isString(r.pwdHash, "!0"))
             dbHash = r.pwdHash;
     }
-    else
+    if (!dbHash)
         dbHash = res.password || res.pwd || res.pwdHash;
-    if (isArray((_d = res.locals) === null || _d === void 0 ? void 0 : _d.rows, ">", 0)) {
+    if (!dbHash && isArray((_d = res.locals) === null || _d === void 0 ? void 0 : _d.rows, ">", 0)) {
         const r = res.locals.rows[0];
         if (isProperty(r, "password", true, true) && isString(r.password, "!0"))
             dbHash = r.password;
@@ -64,12 +64,15 @@ function compare(req, res, next) {
         else if (isProperty(r, "pwdHash", true, true) && isString(r.pwdHash, "!0"))
             dbHash = r.pwdHash;
     }
-    else
-        dbHash = res.password || res.pwd || res.pwdHash;
     if (!dbHash)
         return next({ statusCode: 400, message: `${PE_PREFIX}Missing hash from the database. Should be in res.password or res.pwd or res.pwdHash or res.rows[0].password or res.rows[0].pwd or res.rows[0].pwdHash or res.locals.rows[0].password or res.locals.rows[0].pwd or res.locals.rows[0].pwdHash` });
-    if (!compare$1(pwd, dbHash, PWD_SECRET))
-        return next({ statusCode: 401, message: `${PE_PREFIX}Wrong password` });
+    try {
+        if (!compare$1(pwd, dbHash, PWD_SECRET, true))
+            return next({ statusCode: 401, message: `${PE_PREFIX}Wrong password` });
+    }
+    catch (error) {
+        return next({ statusCode: 400, message: `${PE_PREFIX}Invalid input - caused by: ${error.message || error}` });
+    }
     log.debug(`${PE_PREFIX}Correct password`);
     next();
 }

@@ -1,3 +1,9 @@
+# 0.4.6 (Sep 19th 2025)
+
+- **BUGFIX**: Fixed hash extraction priority logic in compare middleware - direct properties (`res.password`, `res.pwd`, `res.pwdHash`) now correctly take priority over `res.locals.rows`
+- **IMPROVEMENT**: Added proper error handling for malformed hashes with try-catch block to prevent unhandled exceptions
+- **IMPROVEMENT**: Enhanced error messages with "caused by" format for better debugging (e.g., "Invalid input - caused by: Hashes must have the same byte length to be compared")
+
 # 0.4.5 (Sep 11th 2025)
 
 - Base64 secrets sent to encrypt() and compare() functions does not need to be url-safe anymore

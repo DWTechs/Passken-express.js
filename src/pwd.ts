@@ -103,6 +103,7 @@ function compare(req: Request, res: MyResponse, next: NextFunction) {
   
   let dbHash: string | undefined = undefined;
   
+  // First priority: Check res.rows[0] for hash
   if (isArray(res.rows, ">", 0)) {
     const r = res.rows[0];
     if (isProperty(r, "password", true, true) && isString(r.password, "!0"))
@@ -111,10 +112,14 @@ function compare(req: Request, res: MyResponse, next: NextFunction) {
       dbHash = r.pwd;
     else if (isProperty(r, "pwdHash", true, true) && isString(r.pwdHash, "!0"))
       dbHash = r.pwdHash;
-  } else 
+  }
+
+  // Second priority: Check direct properties if not found in rows
+  if (!dbHash)
     dbHash = res.password || res.pwd || res.pwdHash;
 
-  if (isArray(res.locals?.rows, ">", 0)) {
+  // Third priority: Check res.locals.rows[0] if still not found
+  if (!dbHash && isArray(res.locals?.rows, ">", 0)) {
     const r = res.locals.rows[0] as Object;
     if (isProperty(r, "password", true, true) && isString(r.password, "!0"))
       dbHash = r.password;
@@ -122,14 +127,18 @@ function compare(req: Request, res: MyResponse, next: NextFunction) {
       dbHash = r.pwd;
     else if (isProperty(r, "pwdHash", true, true) && isString(r.pwdHash, "!0"))
       dbHash = r.pwdHash;
-  } else 
-    dbHash = res.password || res.pwd || res.pwdHash;
+  }
 
   if (!dbHash) 
     return next({ statusCode: 400, message: `${PE_PREFIX}Missing hash from the database. Should be in res.password or res.pwd or res.pwdHash or res.rows[0].password or res.rows[0].pwd or res.rows[0].pwdHash or res.locals.rows[0].password or res.locals.rows[0].pwd or res.locals.rows[0].pwdHash` });
   
-  if (!comparePWD(pwd, dbHash, PWD_SECRET as string))
-    return next({ statusCode: 401, message: `${PE_PREFIX}Wrong password` });
+  try {
+    if (!comparePWD(pwd, dbHash, PWD_SECRET as string, true))
+      return next({ statusCode: 401, message: `${PE_PREFIX}Wrong password` });
+  } catch (error: any) {
+    // Handle malformed hash gracefully - include original error for debugging
+    return next({ statusCode: 400, message: `${PE_PREFIX}Invalid input - caused by: ${error.message || error}` });
+  }
 
   log.debug(`${PE_PREFIX}Correct password`);
   next();
