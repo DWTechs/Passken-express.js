@@ -1,6 +1,9 @@
 # 0.5.0 (Oct 15th 2025)
 
 - Update environment variable names for random password options.
+- Update dependencies:
+  - "@dwtechs/checkard": "3.6.0"
+  - "@dwtechs/passken": "0.6.0"
 
 # 0.4.6 (Sep 19th 2025)
 
