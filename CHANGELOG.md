@@ -1,3 +1,7 @@
+# 0.5.0 (Oct 15th 2025)
+
+- Update environment variable names for random password options.
+
 # 0.4.6 (Sep 19th 2025)
 
 - **BUGFIX**: Fixed hash extraction priority logic in compare middleware - direct properties (`res.password`, `res.pwd`, `res.pwdHash`) now correctly take priority over `res.locals.rows`

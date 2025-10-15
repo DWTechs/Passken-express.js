@@ -120,13 +120,13 @@ Options = {
 You do not need to intialise the library using **pwd.init()** if you are using the following environment variables:
  
 ```bash
-  PWD_LENGTH,
-  PWD_NUMBERS,
-  PWD_UPPERCASE,
-  PWD_LOWERCASE,
-  PWD_SYMBOLS,
-  PWD_STRICT,
-  PWD_SIMILAR_CHARS,
+  PWD_RAND_LENGTH,
+  PWD_RAND_NUMBERS,
+  PWD_RAND_UPPERCASE,
+  PWD_RAND_LOWERCASE,
+  PWD_RAND_SYMBOLS,
+  PWD_RAND_STRICT,
+  PWD_RAND_SIMILAR_CHARS,
   PWD_SECRET,
 ```
 
